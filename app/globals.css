@@ -1,0 +1,149 @@
+/* Pretendard 가변 폰트 — CDN */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css");
+/* KaTeX 스타일시트 */
+@import "katex/dist/katex.min.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ───────────────────────── 종이책 느낌 글로벌 ───────────────────────── */
+
+:root {
+  --paper: #FAF7F0;
+  --paper-edge: #F0E8D5;
+  --ink: #2B241B;
+  --ink-soft: #3B342A;
+  --ink-muted: #6B6052;
+  --sepia: #C39E55;
+  --rule: #E8D2A6;
+}
+
+html, body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-feature-settings: "ss06", "kern";
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 한국어·영문 혼용 가독성을 위한 본문 기본값 */
+body {
+  font-size: 16.5px;
+  line-height: 1.78;
+}
+
+@media (min-width: 768px) {
+  body { font-size: 17px; line-height: 1.8; }
+}
+
+/* 종이질감(아주 옅은 노이즈) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(rgba(120, 90, 50, 0.04) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+
+/* ───────────────────────── 컴포넌트 헬퍼 ───────────────────────── */
+
+@layer components {
+  .paper-card {
+    @apply rounded-2xl bg-paper-50 ring-1 ring-sepia-100 shadow-[0_1px_0_0_rgba(160,127,55,0.12),0_8px_24px_-12px_rgba(80,55,20,0.18)];
+  }
+  .paper-card-soft {
+    @apply rounded-xl bg-paper-100 ring-1 ring-sepia-100;
+  }
+  .step-block {
+    @apply rounded-lg border-l-[3px] border-sepia-300 bg-paper-100 px-4 py-3 my-3;
+  }
+  .answer-block {
+    @apply rounded-lg border-l-[3px] border-success-line bg-success-paper text-success-ink px-4 py-3 my-3;
+  }
+  .intuition-block {
+    @apply rounded-lg border-l-[3px] border-warning-line bg-warning-paper text-warning-ink px-4 py-3 my-3;
+  }
+  .deco-rule {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-sepia-200 to-transparent my-6;
+  }
+  .nav-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-ink-soft hover:bg-paper-200 transition-colors;
+  }
+  .nav-item-active {
+    @apply bg-paper-200 text-ink ring-1 ring-sepia-100;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full bg-paper-200 px-2.5 py-0.5 text-xs ring-1 ring-sepia-100 text-ink-muted;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-lg bg-amber-warm px-4 py-2 text-paper-50 hover:bg-[#9d4e00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-lg bg-paper-100 px-3 py-2 text-ink-soft ring-1 ring-sepia-100 hover:bg-paper-200 transition-colors;
+  }
+}
+
+/* ───────────────────────── KaTeX 톤 조정 ───────────────────────── */
+.katex {
+  font-size: 1.04em;
+  color: var(--ink);
+}
+.katex-display {
+  margin: 1.1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.katex-display > .katex {
+  white-space: nowrap;
+}
+
+/* 표(테이블) 종이책 느낌 */
+.prose table {
+  border-collapse: collapse;
+}
+.prose thead th {
+  background: #F4E6CB;
+  font-weight: 600;
+}
+.prose tbody td, .prose thead th {
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.7rem;
+}
+
+/* 인용·강조 */
+.prose blockquote {
+  font-style: normal;
+  border-left-color: var(--sepia);
+  background: rgba(195, 158, 85, 0.08);
+  padding: 0.6rem 1rem;
+  border-radius: 0.4rem;
+}
+
+/* 코드(인라인) */
+.prose code:not(pre code) {
+  background: rgba(195, 158, 85, 0.15);
+  padding: 0.05em 0.35em;
+  border-radius: 0.3em;
+  font-size: 0.95em;
+}
+.prose code::before, .prose code::after { content: "" !important; }
+
+/* 상단 헤더 약간의 활자체 강조 */
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+
+/* 스크롤바 (가벼운 톤) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #E8D2A6; border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }

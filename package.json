@@ -1,0 +1,35 @@
+{
+  "name": "labor-econ-study",
+  "version": "1.0.0",
+  "private": true,
+  "description": "노동경제학과 기출 학습 도우미 (Next.js + Vercel)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "clsx": "2.1.1",
+    "katex": "0.16.22",
+    "next": "^16.2.9",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-markdown": "9.0.3",
+    "rehype-katex": "7.0.1",
+    "remark-gfm": "4.0.0",
+    "remark-math": "6.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "0.5.16",
+    "@types/katex": "0.16.7",
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.5.1",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3"
+  }
+}

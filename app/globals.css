@@ -147,3 +147,37 @@ h1, h2, h3 {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #E8D2A6; border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ───────────────────────── 자가진단 — 피드백 애니메이션 ───────────────────────── */
+
+@keyframes quiz-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+  20%, 40%, 60%, 80%      { transform: translateX(6px); }
+}
+@keyframes quiz-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.04); }
+  70%  { transform: scale(0.99); }
+  100% { transform: scale(1); }
+}
+@keyframes quiz-glow-ok {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.0); }
+  40%  { box-shadow: 0 0 0 12px rgba(46, 125, 50, 0.18); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.0); }
+}
+@keyframes quiz-glow-bad {
+  0%   { box-shadow: 0 0 0 0 rgba(173, 56, 38, 0.0); }
+  40%  { box-shadow: 0 0 0 12px rgba(173, 56, 38, 0.16); }
+  100% { box-shadow: 0 0 0 0 rgba(173, 56, 38, 0.0); }
+}
+@keyframes quiz-fade-up {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.quiz-pop      { animation: quiz-pop 0.45s ease-out, quiz-glow-ok 1.1s ease-out; }
+.quiz-shake    { animation: quiz-shake 0.5s ease-in-out, quiz-glow-bad 1.1s ease-out; }
+.quiz-fade-up  { animation: quiz-fade-up 0.35s ease-out; }
+.quiz-flash-ok  { animation: quiz-glow-ok 1.0s ease-out; }
+.quiz-flash-bad { animation: quiz-glow-bad 1.0s ease-out; }

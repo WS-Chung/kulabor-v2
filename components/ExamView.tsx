@@ -98,8 +98,11 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
         )}
 
         {q.background && (
-          <section className="space-y-2">
-            <Markdown>{q.background}</Markdown>
+          <section className="rounded-lg bg-paper-200/60 ring-1 ring-sepia-100 px-5 py-4 space-y-2">
+            <div className="text-[11px] uppercase tracking-[0.2em] text-ink-muted font-semibold">
+              📜 제시문
+            </div>
+            <Markdown proseSize="base">{q.background}</Markdown>
           </section>
         )}
 
@@ -107,7 +110,11 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
 
         <div className="space-y-3">
           {q.subparts.map((sp, i) => (
-            <SubPartCard key={i} sub={sp} />
+            <SubPartCard
+              key={i}
+              sub={sp}
+              defaultOpen={q.subparts.length === 1}
+            />
           ))}
         </div>
       </article>
@@ -115,8 +122,13 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
   );
 }
 
-function SubPartCard({ sub }: { sub: SubPart }) {
-  const [open, setOpen] = useState(false);
+function SubPartCard({ sub, defaultOpen = false }: { sub: SubPart; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  // 라벨 표기 — "단일"이나 빈 라벨인 경우 부드러운 대체 텍스트 사용
+  const rawLabel = (sub.label || "").trim();
+  const isSingleton = rawLabel === "" || rawLabel === "단일" || rawLabel === "풀이";
+  const badge = isSingleton ? "풀이" : rawLabel.replace(/[()]/g, "").slice(0, 2);
 
   return (
     <details
@@ -125,8 +137,13 @@ function SubPartCard({ sub }: { sub: SubPart }) {
       className="paper-card-soft px-4 md:px-5 py-3 md:py-4 group"
     >
       <summary className="cursor-pointer list-none flex items-start gap-3">
-        <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-sepia-100 text-ink text-xs font-bold shrink-0">
-          {sub.label.replace(/[()]/g, "").slice(0, 2)}
+        <span
+          className={clsx(
+            "mt-1 inline-flex h-6 items-center justify-center rounded-full bg-sepia-100 text-ink text-xs font-bold shrink-0",
+            isSingleton ? "px-3" : "w-6",
+          )}
+        >
+          {badge}
         </span>
         <span className="flex-1">
           <span className="text-sm md:text-[15.5px] text-ink-soft font-medium">

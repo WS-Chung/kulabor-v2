@@ -1,11 +1,13 @@
 import type { Config } from "tailwindcss";
 
 /**
- * 종이책 느낌의 따뜻한 가독 테마.
- * - paper: 본문 배경 (크림색 종이)
- * - ink: 본문 텍스트 (다크 브라운, 검정보다 따뜻)
- * - sepia: 강조/박스 배경
- * - amber: 액센트
+ * Apple 디자인 시스템 적용 (DESIGN-apple.md).
+ *
+ * 핵심:
+ * - 단일 Action Blue (#0066CC) 액센트, 그 외엔 모노크롬
+ * - 그림자 없음 (hairline 테두리만), 편집 영역 카드는 18px 라운드
+ * - SF Pro 대체로 Pretendard Variable 사용 (한글 최적화 + Apple 톤 호환)
+ * - 본문 17px, letter-spacing -0.374px (Apple 식 ‘tight’ 헤드라인 톤)
  */
 const config: Config = {
   content: [
@@ -22,21 +24,20 @@ const config: Config = {
           "-apple-system",
           "BlinkMacSystemFont",
           "system-ui",
-          "Roboto",
-          "Helvetica Neue",
-          "Segoe UI",
+          "SF Pro Text",
           "Apple SD Gothic Neo",
           "Noto Sans KR",
           "Malgun Gothic",
           "sans-serif",
         ],
-        serif: [
+        display: [
           "Pretendard Variable",
           "Pretendard",
-          "Source Serif Pro",
-          "Iowan Old Style",
-          "Apple Garamond",
-          "serif",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "SF Pro Display",
+          "system-ui",
+          "sans-serif",
         ],
         mono: [
           "ui-monospace",
@@ -47,50 +48,110 @@ const config: Config = {
         ],
       },
       colors: {
-        paper: {
-          DEFAULT: "#FAF7F0",
-          50: "#FFFEFB",
-          100: "#FCFAF4",
-          200: "#F7F1E4",
-          300: "#EFE6D2",
-          400: "#E6D8B8",
+        // ── Apple Action Blue (단일 인터랙션 컬러) ─────
+        action: {
+          DEFAULT: "#0066CC",
+          focus: "#0071E3",
+          dark: "#2997FF", // 어두운 표면 위에서의 링크
         },
+
+        // ── 표면 ─────
+        canvas: "#FFFFFF",
+        parchment: "#F5F5F7",
+        pearl: "#FAFAFC",
+        tile: {
+          1: "#272729",
+          2: "#2A2A2C",
+          3: "#252527",
+        },
+
+        // ── 잉크(텍스트) ─────
         ink: {
-          DEFAULT: "#2B241B",
-          soft: "#3B342A",
-          muted: "#6B6052",
-          faint: "#9A8E7E",
+          DEFAULT: "#1D1D1F",
+          soft: "#333333",
+          muted: "#7A7A7A",
+          faint: "#B8B8B8",
+        },
+
+        // ── Hairlines ─────
+        hairline: "#E0E0E0",
+        "divider-soft": "#F0F0F0",
+        chip: "#D2D2D7",
+
+        // ── 상태(서브) ─────
+        ok: {
+          bg: "#EEF6EC",
+          fg: "#1F5C2E",
+          line: "#BFDBB1",
+        },
+        warn: {
+          bg: "#FFF6E5",
+          fg: "#7C5300",
+          line: "#EFD392",
+        },
+        err: {
+          bg: "#FBEDE9",
+          fg: "#8B2A1B",
+          line: "#E6B0A2",
+        },
+
+        // ── 호환성(이전 키 유지) ─────
+        // 점진 이행을 위해 기존 paper/sepia/amber 키도 매핑한다
+        paper: {
+          DEFAULT: "#FFFFFF",
+          50: "#FFFFFF",
+          100: "#FAFAFC",
+          200: "#F5F5F7",
+          300: "#EBEBED",
+          400: "#D2D2D7",
         },
         sepia: {
-          50: "#FBF3E4",
-          100: "#F4E6CB",
-          200: "#E8D2A6",
-          300: "#D8B97C",
-          400: "#C39E55",
-          500: "#A07F37",
-          600: "#7A5F26",
+          50: "#F5F5F7",
+          100: "#E0E0E0",
+          200: "#E0E0E0",
+          300: "#D2D2D7",
+          400: "#7A7A7A",
         },
         amber: {
-          warm: "#B35C00",
+          warm: "#0066CC",
         },
         success: {
-          paper: "#E9F1E4",
-          ink: "#2D5A1F",
-          line: "#A6C58D",
+          paper: "#EEF6EC",
+          ink: "#1F5C2E",
+          line: "#BFDBB1",
         },
         warning: {
-          paper: "#FBEFD6",
-          ink: "#7A4A0E",
-          line: "#D9B66B",
+          paper: "#FFF6E5",
+          ink: "#7C5300",
+          line: "#EFD392",
         },
         error: {
-          paper: "#F7E1DD",
-          ink: "#7A2A1B",
-          line: "#D49283",
+          paper: "#FBEDE9",
+          ink: "#8B2A1B",
+          line: "#E6B0A2",
         },
+      },
+      borderRadius: {
+        sm: "8px",
+        DEFAULT: "11px",
+        md: "11px",
+        lg: "18px",
+        pill: "9999px",
+      },
+      fontSize: {
+        body: ["17px", { lineHeight: "1.47", letterSpacing: "-0.374px" }],
+        "body-strong": ["17px", { lineHeight: "1.24", letterSpacing: "-0.374px" }],
+        tagline: ["21px", { lineHeight: "1.19", letterSpacing: "0.231px" }],
+        "display-md": ["34px", { lineHeight: "1.18", letterSpacing: "-0.374px" }],
+        "display-lg": ["40px", { lineHeight: "1.10", letterSpacing: "-0.005em" }],
+        hero: ["56px", { lineHeight: "1.07", letterSpacing: "-0.018em" }],
+        caption: ["14px", { lineHeight: "1.43", letterSpacing: "-0.224px" }],
+        "caption-strong": ["14px", { lineHeight: "1.29", letterSpacing: "-0.224px" }],
+        fine: ["12px", { lineHeight: "1.4", letterSpacing: "-0.12px" }],
       },
       maxWidth: {
         prose: "70ch",
+        narrow: "60rem",
         page: "78rem",
       },
       typography: ({ theme }: any) => ({
@@ -99,19 +160,19 @@ const config: Config = {
             "--tw-prose-body": theme("colors.ink.DEFAULT"),
             "--tw-prose-headings": theme("colors.ink.DEFAULT"),
             "--tw-prose-lead": theme("colors.ink.soft"),
-            "--tw-prose-links": theme("colors.amber.warm"),
+            "--tw-prose-links": theme("colors.action.DEFAULT"),
             "--tw-prose-bold": theme("colors.ink.DEFAULT"),
             "--tw-prose-counters": theme("colors.ink.muted"),
-            "--tw-prose-bullets": theme("colors.sepia.300"),
-            "--tw-prose-hr": theme("colors.sepia.200"),
+            "--tw-prose-bullets": theme("colors.hairline"),
+            "--tw-prose-hr": theme("colors.divider-soft"),
             "--tw-prose-quotes": theme("colors.ink.soft"),
-            "--tw-prose-quote-borders": theme("colors.sepia.300"),
+            "--tw-prose-quote-borders": theme("colors.action.DEFAULT"),
             "--tw-prose-captions": theme("colors.ink.muted"),
             "--tw-prose-code": theme("colors.ink.DEFAULT"),
             "--tw-prose-pre-code": theme("colors.ink.DEFAULT"),
-            "--tw-prose-pre-bg": theme("colors.paper.200"),
-            "--tw-prose-th-borders": theme("colors.sepia.200"),
-            "--tw-prose-td-borders": theme("colors.sepia.100"),
+            "--tw-prose-pre-bg": theme("colors.parchment"),
+            "--tw-prose-th-borders": theme("colors.hairline"),
+            "--tw-prose-td-borders": theme("colors.divider-soft"),
           },
         },
       }),

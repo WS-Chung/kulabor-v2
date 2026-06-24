@@ -1,94 +1,117 @@
-/* Pretendard 가변 폰트 — CDN */
+/* Pretendard 가변 폰트 — CDN (SF Pro 대체, 한글 최적화) */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css");
-/* KaTeX 스타일시트 */
+/* KaTeX */
 @import "katex/dist/katex.min.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ───────────────────────── 종이책 느낌 글로벌 ───────────────────────── */
+/* ───────────────────────── Apple 시스템 글로벌 ───────────────────────── */
 
 :root {
-  --paper: #FAF7F0;
-  --paper-edge: #F0E8D5;
-  --ink: #2B241B;
-  --ink-soft: #3B342A;
-  --ink-muted: #6B6052;
-  --sepia: #C39E55;
-  --rule: #E8D2A6;
+  --canvas: #FFFFFF;
+  --parchment: #F5F5F7;
+  --pearl: #FAFAFC;
+  --ink: #1D1D1F;
+  --ink-soft: #333333;
+  --ink-muted: #7A7A7A;
+  --ink-faint: #B8B8B8;
+  --action: #0066CC;
+  --action-focus: #0071E3;
+  --action-dark: #2997FF;
+  --hairline: #E0E0E0;
+  --divider-soft: #F0F0F0;
 }
 
 html, body {
-  background-color: var(--paper);
+  background-color: var(--canvas);
   color: var(--ink);
   font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
   font-feature-settings: "ss06", "kern";
-  letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* 한국어·영문 혼용 가독성을 위한 본문 기본값 */
+/* 본문 17px, Apple ‘tight’ 톤 */
 body {
-  font-size: 16.5px;
-  line-height: 1.78;
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.011em;
 }
 
-@media (min-width: 768px) {
-  body { font-size: 17px; line-height: 1.8; }
+/* 모든 헤딩은 negative tracking + weight 600 (Apple 룰) */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
-/* 종이질감(아주 옅은 노이즈) */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: radial-gradient(rgba(120, 90, 50, 0.04) 1px, transparent 1px);
-  background-size: 3px 3px;
-  mix-blend-mode: multiply;
-  opacity: 0.6;
-}
+/* 셀렉션 톤 */
+::selection { background: rgba(0, 102, 204, 0.18); color: var(--ink); }
 
 /* ───────────────────────── 컴포넌트 헬퍼 ───────────────────────── */
 
 @layer components {
+  /* 카드 — 그림자 없음, hairline + 18px 라운드 */
+  .surface-card {
+    @apply rounded-lg bg-canvas ring-1 ring-hairline;
+  }
+  .surface-card-soft {
+    @apply rounded-lg bg-parchment ring-1 ring-divider-soft;
+  }
+
+  /* 호환성: 기존 paper-card / paper-card-soft 도 같은 외형으로 매핑 */
   .paper-card {
-    @apply rounded-2xl bg-paper-50 ring-1 ring-sepia-100 shadow-[0_1px_0_0_rgba(160,127,55,0.12),0_8px_24px_-12px_rgba(80,55,20,0.18)];
+    @apply rounded-lg bg-canvas ring-1 ring-hairline;
   }
   .paper-card-soft {
-    @apply rounded-xl bg-paper-100 ring-1 ring-sepia-100;
+    @apply rounded-lg bg-parchment ring-1 ring-divider-soft;
   }
+
+  /* 단계 / 답 / 직관 박스 — 평면 + 액션블루 hairline */
   .step-block {
-    @apply rounded-lg border-l-[3px] border-sepia-300 bg-paper-100 px-4 py-3 my-3;
+    @apply rounded-lg border-l-[3px] border-action bg-parchment px-4 py-3 my-3;
   }
   .answer-block {
-    @apply rounded-lg border-l-[3px] border-success-line bg-success-paper text-success-ink px-4 py-3 my-3;
+    @apply rounded-lg border-l-[3px] border-ok-line bg-ok-bg text-ok-fg px-4 py-3 my-3;
   }
   .intuition-block {
-    @apply rounded-lg border-l-[3px] border-warning-line bg-warning-paper text-warning-ink px-4 py-3 my-3;
+    @apply rounded-lg border-l-[3px] border-warn-line bg-warn-bg text-warn-fg px-4 py-3 my-3;
   }
+
+  /* 가는 구분선 — 점진 페이드 대신 단일 hairline */
   .deco-rule {
-    @apply h-px w-full bg-gradient-to-r from-transparent via-sepia-200 to-transparent my-6;
+    @apply h-px w-full bg-divider-soft my-6;
   }
+
+  /* 사이드바 항목 */
   .nav-item {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-ink-soft hover:bg-paper-200 transition-colors;
+    @apply flex items-center gap-3 rounded-md px-3 py-2 text-ink-soft hover:bg-pearl transition-colors;
   }
   .nav-item-active {
-    @apply bg-paper-200 text-ink ring-1 ring-sepia-100;
+    @apply bg-pearl text-ink ring-1 ring-hairline;
   }
+
+  /* 칩 (메타 정보 표기) */
   .chip {
-    @apply inline-flex items-center rounded-full bg-paper-200 px-2.5 py-0.5 text-xs ring-1 ring-sepia-100 text-ink-muted;
+    @apply inline-flex items-center rounded-pill bg-parchment px-2.5 py-0.5 text-[12.5px] tracking-[-0.12px] text-ink-muted ring-1 ring-divider-soft;
   }
+
+  /* Action Blue Pill — 1차 CTA */
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-lg bg-amber-warm px-4 py-2 text-paper-50 hover:bg-[#9d4e00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 rounded-pill bg-action px-[22px] py-[11px] text-canvas text-[15px] font-normal tracking-[-0.011em] hover:bg-action-focus active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
   }
+
+  /* Pearl Capsule — 2차 (덜 강조된 액션) */
   .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-lg bg-paper-100 px-3 py-2 text-ink-soft ring-1 ring-sepia-100 hover:bg-paper-200 transition-colors;
+    @apply inline-flex items-center gap-2 rounded-md bg-pearl px-[14px] py-[8px] text-ink-soft text-[14px] tracking-[-0.224px] ring-1 ring-divider-soft hover:bg-parchment transition-colors;
+  }
+
+  /* Outlined Pill — 보조 CTA */
+  .btn-outline {
+    @apply inline-flex items-center gap-2 rounded-pill px-[22px] py-[10px] text-action text-[15px] tracking-[-0.011em] ring-1 ring-action hover:bg-action hover:text-canvas active:scale-[0.97] transition-all;
   }
 }
 
@@ -106,62 +129,66 @@ body::before {
   white-space: nowrap;
 }
 
-/* 표(테이블) 종이책 느낌 */
+/* ───────────────────────── prose 톤 ───────────────────────── */
+.prose {
+  --tw-prose-body: var(--ink);
+}
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose h1, .prose h2, .prose h3, .prose h4 { letter-spacing: -0.015em; }
+.prose a { color: var(--action); text-decoration: none; }
+.prose a:hover { text-decoration: underline; }
+
+/* 표 — Apple 톤(가는 hairline) */
 .prose table {
   border-collapse: collapse;
+  font-size: 0.95em;
 }
 .prose thead th {
-  background: #F4E6CB;
+  background: var(--parchment);
   font-weight: 600;
 }
 .prose tbody td, .prose thead th {
-  border: 1px solid var(--rule);
-  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--divider-soft);
+  padding: 0.5rem 0.75rem;
 }
 
-/* 인용·강조 */
+/* 인용 — Action Blue tint */
 .prose blockquote {
   font-style: normal;
-  border-left-color: var(--sepia);
-  background: rgba(195, 158, 85, 0.08);
+  border-left-color: var(--action);
+  background: rgba(0, 102, 204, 0.05);
   padding: 0.6rem 1rem;
   border-radius: 0.4rem;
 }
 
-/* 이미지(그래프·차트) — 종이책 톤 */
+/* 인라인 코드 — 미세 회색 */
+.prose code:not(pre code) {
+  background: var(--parchment);
+  border: 1px solid var(--divider-soft);
+  padding: 0.05em 0.35em;
+  border-radius: 0.3em;
+  font-size: 0.92em;
+}
+.prose code::before, .prose code::after { content: "" !important; }
+
+/* 이미지(그래프·차트) — Apple 톤 */
 .prose img {
   display: block;
   margin: 1rem auto;
   max-width: 100%;
   height: auto;
-  border-radius: 0.5rem;
-  background: #FFFFFF;
+  border-radius: 0.75rem;
+  background: var(--canvas);
   padding: 0.5rem;
-  box-shadow: 0 1px 2px rgba(80, 55, 20, 0.08), 0 8px 24px -10px rgba(80, 55, 20, 0.18);
-  ring: 1px solid var(--rule);
+  box-shadow: 0 0 0 1px var(--divider-soft) inset;
 }
 @media (min-width: 768px) {
   .prose img { max-width: 720px; }
 }
 
-/* 코드(인라인) */
-.prose code:not(pre code) {
-  background: rgba(195, 158, 85, 0.15);
-  padding: 0.05em 0.35em;
-  border-radius: 0.3em;
-  font-size: 0.95em;
-}
-.prose code::before, .prose code::after { content: "" !important; }
-
-/* 상단 헤더 약간의 활자체 강조 */
-h1, h2, h3 {
-  letter-spacing: -0.015em;
-  font-weight: 700;
-}
-
 /* 스크롤바 (가벼운 톤) */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #E8D2A6; border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 /* ───────────────────────── 자가진단 — 피드백 애니메이션 ───────────────────────── */
@@ -173,19 +200,19 @@ h1, h2, h3 {
 }
 @keyframes quiz-pop {
   0%   { transform: scale(1); }
-  35%  { transform: scale(1.04); }
+  35%  { transform: scale(1.03); }
   70%  { transform: scale(0.99); }
   100% { transform: scale(1); }
 }
 @keyframes quiz-glow-ok {
-  0%   { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.0); }
-  40%  { box-shadow: 0 0 0 12px rgba(46, 125, 50, 0.18); }
-  100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.0); }
+  0%   { box-shadow: 0 0 0 0 rgba(31, 92, 46, 0.0); }
+  40%  { box-shadow: 0 0 0 12px rgba(31, 92, 46, 0.16); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 92, 46, 0.0); }
 }
 @keyframes quiz-glow-bad {
-  0%   { box-shadow: 0 0 0 0 rgba(173, 56, 38, 0.0); }
-  40%  { box-shadow: 0 0 0 12px rgba(173, 56, 38, 0.16); }
-  100% { box-shadow: 0 0 0 0 rgba(173, 56, 38, 0.0); }
+  0%   { box-shadow: 0 0 0 0 rgba(139, 42, 27, 0.0); }
+  40%  { box-shadow: 0 0 0 12px rgba(139, 42, 27, 0.14); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 42, 27, 0.0); }
 }
 @keyframes quiz-fade-up {
   0%   { opacity: 0; transform: translateY(8px); }

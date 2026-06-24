@@ -27,7 +27,6 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
     [exam],
   );
 
-  // 학기 바뀔 때 첫 탭으로
   function switchSemester(key: string) {
     setSemester(key);
     setTab(0);
@@ -38,23 +37,27 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
   const q = exam.questions[tab];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <header className="space-y-2">
-        <p className="text-xs tracking-[0.25em] uppercase text-ink-muted">Past Exams</p>
-        <h1 className="text-2xl md:text-3xl font-bold">📚 기출문제 풀이</h1>
-        <p className="text-ink-soft">
+        <p className="text-[11px] tracking-[0.25em] uppercase text-ink-muted font-medium">
+          Past Exams
+        </p>
+        <h1 className="text-[28px] md:text-[34px] font-semibold tracking-[-0.018em] leading-[1.15]">
+          기출문제 풀이
+        </h1>
+        <p className="text-ink-soft text-[15.5px] tracking-[-0.011em]">
           학기를 선택하고, 문항별 ‘직관 → 단계별 풀이 → 요약 답’ 순서로 학습하세요.
         </p>
       </header>
 
       {/* 학기 셀렉터 */}
-      <div className="paper-card p-4 md:p-5">
+      <div className="surface-card p-4 md:p-5">
         <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-5">
-          <label className="text-sm text-ink-muted">학기 선택</label>
+          <label className="text-[13px] text-ink-muted tracking-[-0.011em]">학기 선택</label>
           <select
             value={semester}
             onChange={(e) => switchSemester(e.target.value)}
-            className="bg-paper-100 ring-1 ring-sepia-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-amber-warm"
+            className="bg-canvas ring-1 ring-hairline rounded-md px-3 py-2 text-[14px] tracking-[-0.011em] focus:outline-none focus:ring-2 focus:ring-action-focus"
           >
             {semesters.map((s) => (
               <option key={s} value={s}>
@@ -62,7 +65,7 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
               </option>
             ))}
           </select>
-          <span className="text-xs text-ink-faint md:ml-auto">
+          <span className="text-[12px] text-ink-faint md:ml-auto tracking-[-0.011em]">
             전체 {semesters.length}개 학기 (2011~2025)
           </span>
         </div>
@@ -76,10 +79,10 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
             type="button"
             onClick={() => setTab(i)}
             className={clsx(
-              "rounded-lg px-3.5 py-1.5 text-sm transition-colors ring-1",
+              "rounded-pill px-4 py-1.5 text-[13.5px] tracking-[-0.011em] transition-all",
               i === tab
-                ? "bg-amber-warm text-paper-50 ring-amber-warm"
-                : "bg-paper-100 text-ink-soft ring-sepia-100 hover:bg-paper-200",
+                ? "bg-action text-canvas ring-1 ring-action"
+                : "bg-canvas text-ink-soft ring-1 ring-hairline hover:bg-parchment",
             )}
           >
             {label}
@@ -87,36 +90,38 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
         ))}
       </div>
 
-      {/* 본문 */}
-      <article className="paper-card p-6 md:p-8 space-y-5">
-        <h2 className="text-xl font-bold">{q.title}</h2>
-
+      {/* 본문 — 요약 타이틀 제거. 제시문이 주(主). */}
+      <article className="surface-card p-6 md:p-9 space-y-6">
+        {/* 학기 안내(있을 때만) */}
         {exam.summary && tab === 0 && (
-          <div className="rounded-lg bg-paper-200 px-4 py-3 text-sm text-ink-soft">
+          <div className="rounded-md bg-parchment ring-1 ring-divider-soft px-4 py-3 text-[13.5px] text-ink-soft tracking-[-0.011em]">
             {exam.summary}
           </div>
         )}
 
+        {/* 제시문 — 시각적 주역. 본문보다 또렷하게. */}
         {q.background && (
-          <section className="rounded-lg bg-paper-200/60 ring-1 ring-sepia-100 px-5 py-4 space-y-2">
-            <div className="text-[11px] uppercase tracking-[0.2em] text-ink-muted font-semibold">
-              📜 제시문
+          <section className="rounded-lg bg-parchment ring-1 ring-hairline pl-6 pr-5 py-5 md:pl-8 md:pr-7 md:py-6 border-l-[3px] border-action">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-action font-semibold mb-3">
+              제시문 / Question
             </div>
-            <Markdown proseSize="base">{q.background}</Markdown>
+            <div className="text-[17px] md:text-[18px] leading-[1.55] tracking-[-0.011em] text-ink">
+              <Markdown proseSize="lg">{q.background}</Markdown>
+            </div>
           </section>
         )}
 
-        <div className="deco-rule" />
-
-        <div className="space-y-3">
-          {q.subparts.map((sp, i) => (
-            <SubPartCard
-              key={i}
-              sub={sp}
-              defaultOpen={q.subparts.length === 1}
-            />
-          ))}
-        </div>
+        {/* 하위 문제(가/나/다) — 제시문보다 시각적 비중을 줄임 */}
+        {q.subparts.length > 0 && (
+          <div className="space-y-2.5">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-ink-muted font-semibold">
+              풀이 / Solution
+            </div>
+            {q.subparts.map((sp, i) => (
+              <SubPartCard key={i} sub={sp} defaultOpen={q.subparts.length === 1} />
+            ))}
+          </div>
+        )}
       </article>
     </div>
   );
@@ -125,7 +130,6 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
 function SubPartCard({ sub, defaultOpen = false }: { sub: SubPart; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
 
-  // 라벨 표기 — "단일"이나 빈 라벨인 경우 부드러운 대체 텍스트 사용
   const rawLabel = (sub.label || "").trim();
   const isSingleton = rawLabel === "" || rawLabel === "단일" || rawLabel === "풀이";
   const badge = isSingleton ? "풀이" : rawLabel.replace(/[()]/g, "").slice(0, 2);
@@ -134,23 +138,23 @@ function SubPartCard({ sub, defaultOpen = false }: { sub: SubPart; defaultOpen?:
     <details
       open={open}
       onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
-      className="paper-card-soft px-4 md:px-5 py-3 md:py-4 group"
+      className="rounded-lg bg-canvas ring-1 ring-divider-soft px-4 md:px-5 py-3 md:py-4 hover:ring-hairline transition-colors"
     >
       <summary className="cursor-pointer list-none flex items-start gap-3">
         <span
           className={clsx(
-            "mt-1 inline-flex h-6 items-center justify-center rounded-full bg-sepia-100 text-ink text-xs font-bold shrink-0",
+            "mt-[3px] inline-flex h-6 items-center justify-center rounded-pill bg-parchment text-ink text-[11.5px] font-semibold shrink-0 ring-1 ring-divider-soft tracking-[-0.011em]",
             isSingleton ? "px-3" : "w-6",
           )}
         >
           {badge}
         </span>
         <span className="flex-1">
-          <span className="text-sm md:text-[15.5px] text-ink-soft font-medium">
+          <span className="text-[14.5px] md:text-[15px] text-ink-soft tracking-[-0.011em] leading-[1.5]">
             {sub.question}
           </span>
         </span>
-        <span className="text-ink-faint text-xs mt-1 select-none">
+        <span className="text-ink-faint text-[11.5px] mt-[5px] select-none tracking-[-0.011em]">
           {open ? "접기 ▲" : "펼치기 ▼"}
         </span>
       </summary>
@@ -158,7 +162,7 @@ function SubPartCard({ sub, defaultOpen = false }: { sub: SubPart; defaultOpen?:
       <div className="mt-4 space-y-3">
         {sub.intuition && (
           <div className="intuition-block">
-            <div className="text-xs font-bold uppercase tracking-wide opacity-80 mb-1">
+            <div className="text-[10.5px] font-bold uppercase tracking-[0.18em] opacity-80 mb-1">
               🪄 직관(쉬운 비유)
             </div>
             <Markdown proseSize="sm">{sub.intuition}</Markdown>
@@ -167,11 +171,11 @@ function SubPartCard({ sub, defaultOpen = false }: { sub: SubPart; defaultOpen?:
 
         {sub.steps && sub.steps.length > 0 && (
           <div>
-            <div className="text-sm font-semibold mb-2">📐 단계별 풀이</div>
+            <div className="text-[12.5px] font-semibold mb-2 tracking-[-0.011em]">📐 단계별 풀이</div>
             <ol className="space-y-3">
               {sub.steps.map((step, i) => (
                 <li key={i} className="step-block">
-                  <div className="text-sm font-semibold mb-1">{step.heading}</div>
+                  <div className="text-[13px] font-semibold mb-1 tracking-[-0.011em]">{step.heading}</div>
                   <Markdown proseSize="sm">{step.body}</Markdown>
                   {step.math && <MathBlock tex={step.math} />}
                 </li>
@@ -182,7 +186,7 @@ function SubPartCard({ sub, defaultOpen = false }: { sub: SubPart; defaultOpen?:
 
         {sub.answer && (
           <div className="answer-block">
-            <div className="text-xs font-bold uppercase tracking-wide opacity-80 mb-1">
+            <div className="text-[10.5px] font-bold uppercase tracking-[0.18em] opacity-80 mb-1">
               ✅ 요약 답
             </div>
             <Markdown proseSize="sm">{sub.answer}</Markdown>

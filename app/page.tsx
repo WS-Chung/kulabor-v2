@@ -1,108 +1,166 @@
 import Link from "next/link";
-import { examsData, wikiData, quizData } from "@/lib/data";
+import { examsData, wikiData, quizData, yearRange } from "@/lib/data";
 
 export default function HomePage() {
   const totalSubparts = Object.values(examsData.items).reduce(
     (acc, e) => acc + e.questions.reduce((s, q) => s + (q.subparts?.length ?? 0), 0),
     0,
   );
+  const totalQuestions = Object.values(examsData.items).reduce(
+    (acc, e) => acc + e.questions.length,
+    0,
+  );
   const totalSemesters = examsData.order.length;
   const totalWiki = Object.values(wikiData.items).reduce((acc, v) => acc + v.length, 0);
+  const range = yearRange(examsData.order);
 
   return (
-    <div className="space-y-14">
-      {/* Hero */}
-      <header className="space-y-4 max-w-2xl pt-2 md:pt-4">
-        <p className="text-[11px] tracking-[0.25em] uppercase text-ink-muted font-medium">
-          Reading Room
-        </p>
-        <h1 className="text-[32px] md:text-[44px] leading-[1.08] tracking-[-0.018em] font-semibold">
-          노동경제학 기출문제,<br />
-          <span className="text-action">차근차근.</span>
-        </h1>
-        <p className="text-ink-soft text-[17px] leading-[1.5] tracking-[-0.011em]">
-          예능계·인문학과 출신 등 경제학 배경이 없는 학습자도 따라갈 수 있도록
-          단계별 풀이·개념 위키·자가진단을 한 곳에 모았습니다.
-        </p>
+    <div>
+      {/* ───────── 헤더 ───────── */}
+      <header className="page-head">
+        <div className="page-head-inner">
+          <p className="eyebrow">Labor Economics</p>
+          <h1 className="page-title mt-2">
+            노동경제학 기출문제,
+            <br />
+            차근차근.
+          </h1>
+          <p className="page-lede max-w-2xl">
+            경제학을 전공하지 않았고 노동경제학이 생소한 직장인 대학원생을 위해 만들었습니다.
+            기출문제는 <strong className="text-ink">문제와 풀이를 분리</strong>해 보여 주고,
+            풀이는 직관 → 단계별 전개 → 요약 답 순서로 이어집니다.
+          </p>
+        </div>
       </header>
 
-      {/* Feature tiles */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <FeatureCard
-          href="/exams"
-          icon="📚"
-          title="기출문제 풀이"
-          subtitle="연도별 단계별 풀이"
-          stat={`${totalSemesters} 학기 · ${totalSubparts} 문제`}
-          desc="2011~2025 학기를 모두 수록. 직관 → 단계별 풀이 → 요약 답 3블록 구조."
-        />
-        <FeatureCard
-          href="/wiki"
-          icon="📖"
-          title="지식 위키"
-          subtitle="배경지식 0에서 출발"
-          stat={`${wikiData.order.length} 카테고리 · ${totalWiki} 항목`}
-          desc="일상 비유 → 정의 → 수식 순서로 핵심 개념을 정리. 시험에서 자주 묻는 포인트 포함."
-        />
-        <FeatureCard
-          href="/quiz"
-          icon="📝"
-          title="자가진단"
-          subtitle="랜덤 20문제 + 즉시 피드백"
-          stat={`${quizData.length} 문제 풀`}
-          desc="4지선다, 답 클릭 즉시 정·오 표시와 풀이 해설을 보여드립니다."
-        />
-      </section>
+      <div className="mx-auto max-w-page space-y-12 px-6 py-10 md:px-10 md:py-12">
+        {/* ───────── 수록 규모 ───────── */}
+        <section aria-label="수록 규모">
+          <h2 className="tan-rule text-title text-ink">수록 규모</h2>
+          <dl className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-hairline bg-hairline md:grid-cols-4">
+            <Stat label="학기" value={totalSemesters} unit="개" note={
+              range ? `${range.min}–${range.max}학년도` : undefined
+            } />
+            <Stat label="문항" value={totalQuestions} unit="개" note="시험지 기준" />
+            <Stat label="하위문항 풀이" value={totalSubparts} unit="개" note="가·나·다 단위" />
+            <Stat label="배경지식 항목" value={totalWiki} unit="개" note={`${wikiData.order.length}개 분야`} />
+          </dl>
+        </section>
 
-      {/* Reading notes */}
-      <section className="surface-card p-7 md:p-9 max-w-3xl">
-        <h2 className="text-[21px] tracking-[-0.012em] mb-3 font-semibold">읽기 노트</h2>
-        <ul className="space-y-2 text-ink-soft text-[15.5px] tracking-[-0.011em] leading-[1.55]">
-          <li>모든 본문은 Pretendard 가변폰트와 Apple Action Blue 액센트로 표현됩니다.</li>
-          <li>수식은 KaTeX로 그려지며, 표시 영역이 좁으면 가로 스크롤됩니다.</li>
-          <li>자가진단은 매번 다른 20문제가 출제되며, 답을 클릭하면 즉시 정·오 표시와 해설이 보여집니다.</li>
-          <li>논술형 문항은 정답이 고정되지 않은 경우가 많아 답안 outline 형태로 제공됩니다.</li>
-        </ul>
-      </section>
+        {/* ───────── 세 가지 기능 ───────── */}
+        <section aria-label="학습 메뉴">
+          <h2 className="tan-rule text-title text-ink">어디서부터 볼까요</h2>
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <FeatureCard
+              href="/exams"
+              step="01"
+              title="기출문제 풀이"
+              stat={`${totalSemesters}개 학기 · ${totalSubparts}개 풀이`}
+              desc="연도와 학기를 골라 문항별로 봅니다. 문제 영역과 풀이 영역이 시각적으로 분리되어 있어, 먼저 스스로 풀어 본 뒤 펼쳐 볼 수 있습니다."
+            />
+            <FeatureCard
+              href="/wiki"
+              step="02"
+              title="지식 위키"
+              stat={`${wikiData.order.length}개 분야 · ${totalWiki}개 항목`}
+              desc="기출을 풀다 막히면 여기로. 일상 비유 → 정의 → 수식 순서로 정리했고, 각 항목이 어느 학기 어느 문항에 쓰이는지 표시했습니다."
+            />
+            <FeatureCard
+              href="/quiz"
+              step="03"
+              title="자가진단 테스트"
+              stat={`${quizData.length}문제 풀 · 랜덤 20문제`}
+              desc="기출을 풀기 전 배경지식이 갖춰졌는지 점검합니다. 보기를 클릭하면 즉시 정·오와 해설이 표시됩니다."
+            />
+          </div>
+        </section>
+
+        {/* ───────── 읽는 방법 ───────── */}
+        <section aria-label="읽는 방법" className="surface-card overflow-hidden">
+          <h2 className="border-b border-hairline bg-surface px-5 py-3 text-label text-ink md:px-7">
+            읽는 방법
+          </h2>
+          <ul className="divide-y divide-divider-soft">
+            <Note title="문제를 먼저 읽습니다">
+              웜 베이지 바탕에 좌측 크림슨 선이 있는 영역이 <strong className="text-ink">문제</strong>입니다.
+              시험지를 그대로 옮긴 것이므로 여기까지만 읽고 스스로 답을 구성해 보세요.
+            </Note>
+            <Note title="풀이는 접혀 있습니다">
+              흰 바탕 영역이 <strong className="text-ink">풀이</strong>입니다. 하위문항을 클릭하면
+              직관(쉬운 비유) → 단계별 전개 → 요약 답 세 블록이 펼쳐집니다.
+              요약 답은 답안지에 그대로 옮길 수 있는 분량으로 맞췄습니다.
+            </Note>
+            <Note title="논술형은 답안 개요입니다">
+              여성 경활·노조·고령화처럼 정답이 하나로 고정되지 않는 문항은 개요(outline) 형태로
+              제시했습니다. 실제 답안 작성 시 해당 학기 강의안과 교차 확인하시기 바랍니다.
+            </Note>
+            <Note title="수식은 가로 스크롤됩니다">
+              화면이 좁으면 수식 블록이 가로로 스크롤됩니다. 표도 마찬가지입니다.
+            </Note>
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  unit,
+  note,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  note?: string;
+}) {
+  return (
+    <div className="bg-canvas px-5 py-5">
+      <dt className="text-meta uppercase text-ink-muted">{label}</dt>
+      <dd className="mt-1.5 flex items-baseline gap-1">
+        <span className="text-[26px] font-bold tabular-nums leading-none text-crimson">
+          {value}
+        </span>
+        <span className="text-[13px] text-ink-soft">{unit}</span>
+      </dd>
+      {note && <p className="mt-1 text-[11.5px] text-ink-faint">{note}</p>}
     </div>
   );
 }
 
 function FeatureCard({
   href,
-  icon,
+  step,
   title,
-  subtitle,
   stat,
   desc,
 }: {
   href: string;
-  icon: string;
+  step: string;
   title: string;
-  subtitle: string;
   stat: string;
   desc: string;
 }) {
   return (
     <Link
       href={href}
-      className="group block surface-card p-6 md:p-7 transition-colors hover:bg-parchment"
+      className="group flex flex-col rounded-md border border-hairline bg-canvas p-6
+                 transition-colors hover:border-crimson/40 hover:bg-parchment"
     >
-      <div className="flex items-start gap-3">
-        <div className="text-[28px] leading-none">{icon}</div>
-        <div>
-          <div className="text-[12px] text-ink-muted tracking-[-0.12px]">{subtitle}</div>
-          <h3 className="text-[19px] font-semibold mt-0.5 tracking-[-0.012em] group-hover:text-action transition-colors">
-            {title}
-          </h3>
-        </div>
-      </div>
-      <p className="mt-4 text-[14.5px] text-ink-soft tracking-[-0.011em] leading-[1.5]">
-        {desc}
-      </p>
-      <div className="mt-4">
-        <span className="chip">{stat}</span>
-      </div>
+      <span className="text-eyebrow uppercase text-crimson">{step}</span>
+      <h3 className="mt-2 text-title text-ink group-hover:text-crimson">{title}</h3>
+      <p className="mt-3 flex-1 text-[14.5px] leading-[1.7] text-ink-soft">{desc}</p>
+      <span className="chip chip-crimson mt-4 self-start">{stat}</span>
     </Link>
+  );
+}
+
+function Note({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <li className="px-5 py-4 md:px-7">
+      <p className="text-[14.5px] font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-[14px] leading-[1.7] text-ink-soft">{children}</p>
+    </li>
   );
 }

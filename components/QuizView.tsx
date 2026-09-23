@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Markdown } from "./Markdown";
 import { clsx } from "clsx";
+import { Markdown } from "./Markdown";
 import type { QuizItem } from "@/lib/types";
 import { playCorrectSound, playWrongSound, primeAudio } from "@/lib/audio";
 
+/** 한 회차에 출제하는 문항 수. 문제은행 50개 중 무작위로 고른다. */
 const NUM_QUESTIONS = 20;
-const ROMAN = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ"];
+const CHOICE_LABEL = ["①", "②", "③", "④", "⑤"];
 const MUTE_KEY = "quiz_muted_v1";
 
 interface RoundResult {
@@ -25,6 +26,12 @@ function shuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
+/**
+ * 자가진단 테스트.
+ *
+ * 문제은행에서 무작위로 20문항을 뽑아 한 문제씩 제시하고, 보기를 클릭하면 즉시 채점한다.
+ * 결과 화면에서는 틀린 문항만 모아 해설과 함께 다시 보여 준다.
+ */
 export function QuizView({ pool }: { pool: QuizItem[] }) {
   const [active, setActive] = useState(false);
   const [questions, setQuestions] = useState<QuizItem[]>([]);
@@ -32,26 +39,29 @@ export function QuizView({ pool }: { pool: QuizItem[] }) {
   const [chosen, setChosen] = useState<number | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [finished, setFinished] = useState(false);
-
   const [muted, setMuted] = useState(false);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     setMuted(window.localStorage.getItem(MUTE_KEY) === "1");
   }, []);
-  const toggleMute = () => {
+
+  const toggleMute = () =>
     setMuted((v) => {
-      const nv = !v;
+      const next = !v;
       try {
-        window.localStorage.setItem(MUTE_KEY, nv ? "1" : "0");
-      } catch {}
-      return nv;
+        window.localStorage.setItem(MUTE_KEY, next ? "1" : "0");
+      } catch {
+        /* 저장 실패는 무시 — 기능에는 영향 없음 */
+      }
+      return next;
     });
-  };
+
+  const topics = useMemo(() => new Set(pool.map((p) => p.topic)).size, [pool]);
 
   const startNew = () => {
     primeAudio();
-    const picked = shuffle(pool).slice(0, Math.min(NUM_QUESTIONS, pool.length));
-    setQuestions(picked);
+    setQuestions(shuffle(pool).slice(0, Math.min(NUM_QUESTIONS, pool.length)));
     setIdx(0);
     setChosen(null);
     setResults([]);
@@ -78,13 +88,12 @@ export function QuizView({ pool }: { pool: QuizItem[] }) {
       try {
         if (isCorrect) playCorrectSound();
         else playWrongSound();
-      } catch {}
+      } catch {
+        /* 오디오 차단 환경 무시 */
+      }
     }
     setChosen(choiceIdx);
-    setResults((prev) => [
-      ...prev,
-      { qid: current.id, chosen: choiceIdx, correct: isCorrect },
-    ]);
+    setResults((prev) => [...prev, { qid: current.id, chosen: choiceIdx, correct: isCorrect }]);
   };
 
   const onNext = () => {
@@ -98,114 +107,140 @@ export function QuizView({ pool }: { pool: QuizItem[] }) {
 
   const correctCount = results.filter((r) => r.correct).length;
 
-  if (!active) {
-    return (
-      <div className="space-y-7">
-        <Header muted={muted} onToggleMute={toggleMute} />
-        <div className="surface-card p-9 md:p-12 text-center space-y-5">
-          <div className="text-[44px] leading-none">🎲</div>
-          <h2 className="text-[21px] font-semibold tracking-[-0.012em]">새 테스트 시작</h2>
-          <p className="text-ink-soft text-[14.5px] tracking-[-0.011em] leading-[1.55]">
-            전체 <strong className="text-ink">{pool.length}문제</strong> 풀에서 <strong className="text-ink">{NUM_QUESTIONS}문제</strong>가 랜덤으로 출제됩니다.<br />
-            보기를 클릭하면 즉시 정답 여부와 풀이 해설이 보여집니다.
-          </p>
-          <div>
-            <button onClick={startNew} className="btn-primary">
-              🎲 새 테스트 시작
-            </button>
-          </div>
-          <div className="text-[12px] text-ink-faint tracking-[-0.011em]">
-            🔊 정답·오답에 짧은 효과음이 재생됩니다. 우측 상단 토글로 끌 수 있어요.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (finished) {
-    return (
-      <div className="space-y-7">
-        <Header muted={muted} onToggleMute={toggleMute} />
-        <ResultSummary
-          total={questions.length}
-          correct={correctCount}
-          results={results}
-          questions={questions}
-          onRestart={() => {
-            reset();
-            setTimeout(startNew, 0);
-          }}
-          onClose={reset}
-        />
-      </div>
-    );
-  }
-
-  if (!current) return null;
-
   return (
-    <div className="space-y-7">
-      <Header muted={muted} onToggleMute={toggleMute} />
+    <div>
+      <PageHead muted={muted} onToggleMute={toggleMute} />
 
-      <ProgressBar idx={idx} total={questions.length} score={correctCount} />
+      <div className="mx-auto max-w-narrow space-y-6 px-6 py-8 md:px-10 md:py-10">
+        {!active && (
+          <StartCard pool={pool.length} topics={topics} onStart={startNew} />
+        )}
 
-      <QuizCard index={idx} q={current} chosen={chosen} onChoose={onChoose} />
+        {active && finished && (
+          <ResultSummary
+            total={questions.length}
+            correct={correctCount}
+            results={results}
+            questions={questions}
+            onRestart={startNew}
+            onClose={reset}
+          />
+        )}
 
-      {chosen !== null && (
-        <div className="flex justify-end">
-          <button onClick={onNext} className="btn-primary quiz-fade-up">
-            {idx + 1 < questions.length ? "다음 문제 →" : "결과 보기 →"}
-          </button>
-        </div>
-      )}
+        {active && !finished && current && (
+          <>
+            <ProgressBar idx={idx} total={questions.length} score={correctCount} />
+            <QuizCard index={idx} q={current} chosen={chosen} onChoose={onChoose} />
+            {chosen !== null && (
+              <div className="flex justify-end">
+                <button type="button" onClick={onNext} className="btn-primary quiz-fade-up">
+                  {idx + 1 < questions.length ? "다음 문제 →" : "결과 보기 →"}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-/* ───────── 보조 컴포넌트 ───────── */
+/* ═════════ 보조 컴포넌트 ═════════ */
 
-function Header({ muted, onToggleMute }: { muted: boolean; onToggleMute: () => void }) {
+function PageHead({ muted, onToggleMute }: { muted: boolean; onToggleMute: () => void }) {
   return (
-    <header className="flex items-start justify-between gap-3">
-      <div className="space-y-2">
-        <p className="text-[11px] tracking-[0.25em] uppercase text-ink-muted font-medium">
-          Self Check
-        </p>
-        <h1 className="text-[28px] md:text-[34px] font-semibold tracking-[-0.018em] leading-[1.15]">
-          자가진단 테스트
-        </h1>
-        <p className="text-ink-soft text-[15.5px] tracking-[-0.011em]">
-          한 문제씩 풀고, 보기를 누르면 즉시 채점·해설이 보여집니다.
+    <header className="page-head">
+      <div className="page-head-inner">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="eyebrow">Self Check</p>
+            <h1 className="page-title mt-2">자가진단 테스트</h1>
+          </div>
+          <button
+            type="button"
+            onClick={onToggleMute}
+            aria-label={muted ? "효과음 켜기" : "효과음 끄기"}
+            className="btn-ghost shrink-0"
+          >
+            {muted ? "효과음 꺼짐" : "효과음 켜짐"}
+          </button>
+        </div>
+        <p className="page-lede max-w-2xl">
+          기출을 풀기 전에 배경지식이 갖춰졌는지 점검하는 도구입니다. 보기를 클릭하면 즉시 정·오와
+          해설이 표시되고, 마지막에 틀린 문항만 모아 다시 보여 드립니다.
         </p>
       </div>
-      <button
-        type="button"
-        onClick={onToggleMute}
-        aria-label={muted ? "효과음 켜기" : "효과음 끄기"}
-        className="btn-ghost shrink-0"
-        title={muted ? "효과음 켜기" : "효과음 끄기"}
-      >
-        {muted ? "🔇 음소거" : "🔊 효과음"}
-      </button>
     </header>
   );
 }
 
-function ProgressBar({ idx, total, score }: { idx: number; total: number; score: number }) {
-  const pct = (idx / total) * 100;
+function StartCard({
+  pool,
+  topics,
+  onStart,
+}: {
+  pool: number;
+  topics: number;
+  onStart: () => void;
+}) {
   return (
-    <div className="surface-card p-4 md:p-5">
-      <div className="flex items-center justify-between text-[13px] mb-2 tracking-[-0.011em]">
+    <section className="surface-card overflow-hidden">
+      <h2 className="border-b border-hairline bg-surface px-5 py-3 text-label text-ink md:px-7">
+        새 테스트 시작
+      </h2>
+      <div className="space-y-6 px-5 py-7 md:px-7 md:py-9">
+        <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-md border border-hairline bg-hairline">
+          <Cell label="문제은행" value={`${pool}문제`} />
+          <Cell label="출제" value={`${NUM_QUESTIONS}문제`} />
+          <Cell label="분야" value={`${topics}개`} />
+        </dl>
+
+        <ul className="space-y-1.5 text-[14.5px] leading-[1.7] text-ink-soft">
+          <li>· 전체 {pool}문제 중 <strong className="text-ink">{NUM_QUESTIONS}문제</strong>가 무작위로 출제됩니다.</li>
+          <li>· 4개 보기 중 하나를 고르면 즉시 채점되며, 한 번 선택하면 바꿀 수 없습니다.</li>
+          <li>· 각 해설에는 그 지식이 <strong className="text-ink">어느 학기 어느 문항</strong>에 쓰이는지 표시했습니다.</li>
+          <li>· 정답·오답에 짧은 효과음이 재생됩니다. 우측 상단에서 끌 수 있습니다.</li>
+        </ul>
+
+        <button type="button" onClick={onStart} className="btn-primary w-full md:w-auto">
+          테스트 시작
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function Cell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-canvas px-4 py-3.5 text-center">
+      <dt className="text-meta uppercase text-ink-muted">{label}</dt>
+      <dd className="mt-1 text-[16px] font-bold text-crimson">{value}</dd>
+    </div>
+  );
+}
+
+function ProgressBar({ idx, total, score }: { idx: number; total: number; score: number }) {
+  const pct = ((idx + 1) / total) * 100;
+  return (
+    <div className="surface-card px-4 py-3.5 md:px-5">
+      <div className="mb-2 flex items-center justify-between text-[13px]">
         <span className="text-ink-soft">
-          진행 <strong className="text-ink">{idx + 1}</strong> / {total}
+          진행 <strong className="tabular-nums text-ink">{idx + 1}</strong> / {total}
         </span>
         <span className="text-ink-soft">
-          정답 <strong className="text-action">{score}</strong> / {idx} 문제
+          정답 <strong className="tabular-nums text-crimson">{score}</strong>
+          {idx > 0 && <span className="text-ink-faint"> / {idx}</span>}
         </span>
       </div>
-      <div className="h-1.5 rounded-pill bg-divider-soft overflow-hidden">
+      <div
+        role="progressbar"
+        aria-valuenow={idx + 1}
+        aria-valuemin={1}
+        aria-valuemax={total}
+        className="h-1.5 overflow-hidden rounded-sm bg-divider-soft"
+      >
         <div
-          className="h-full bg-action transition-all duration-500"
+          className="h-full bg-crimson transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -227,101 +262,116 @@ function QuizCard({
   const submitted = chosen !== null;
   const isCorrect = submitted && chosen === q.correct;
 
-  const cardClass = clsx(
-    "surface-card p-6 md:p-8 space-y-5",
-    submitted && (isCorrect ? "quiz-pop" : "quiz-shake"),
-  );
-
   return (
-    <article className={cardClass} key={q.id}>
-      <div className="flex flex-wrap items-baseline gap-2">
-        <span className="chip">Q{index + 1}</span>
+    <article
+      key={q.id}
+      className={clsx(
+        "surface-card overflow-hidden",
+        submitted && (isCorrect ? "quiz-pop" : "quiz-shake"),
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2 border-b border-hairline bg-surface px-5 py-2.5 md:px-7">
+        <span className="chip chip-crimson">Q{index + 1}</span>
         <span className="chip">{q.topic}</span>
       </div>
-      <div className="text-[16px] md:text-[17px] leading-[1.5] tracking-[-0.011em]">
-        <Markdown proseSize="base">{q.question}</Markdown>
-      </div>
 
-      <ul className="space-y-2.5">
-        {q.choices.map((choice, i) => {
-          const isAnswer = i === q.correct;
-          const isChosen = chosen === i;
+      <div className="space-y-5 px-5 py-6 md:px-7">
+        <div className="text-[16px] leading-[1.7] text-ink md:text-[17px]">
+          <Markdown proseSize="base">{q.question}</Markdown>
+        </div>
 
-          let stateClass: string;
-          let suffix: React.ReactNode = null;
+        <ul className="space-y-2">
+          {q.choices.map((choice, i) => {
+            const isAnswer = i === q.correct;
+            const isChosen = chosen === i;
 
-          if (!submitted) {
-            stateClass =
-              "bg-canvas ring-divider-soft hover:bg-parchment hover:ring-hairline cursor-pointer";
-          } else if (isAnswer) {
-            stateClass = "bg-ok-bg ring-ok-line ring-2";
-            suffix = <span className="text-ok-fg font-semibold ml-2 text-[12.5px] tracking-[-0.011em] shrink-0">✓ 정답</span>;
-          } else if (isChosen && !isAnswer) {
-            stateClass = "bg-err-bg ring-err-line ring-2";
-            suffix = <span className="text-err-fg font-semibold ml-2 text-[12.5px] tracking-[-0.011em] shrink-0">✗ 선택</span>;
-          } else {
-            stateClass = "bg-canvas ring-divider-soft opacity-70";
-          }
+            let box = "border-hairline bg-canvas hover:border-crimson/40 hover:bg-parchment";
+            let badge = "border-rule bg-canvas text-ink-muted";
+            let mark: React.ReactNode = null;
 
-          return (
-            <li key={i}>
-              <button
-                type="button"
-                disabled={submitted}
-                onClick={() => onChoose(i)}
-                className={clsx(
-                  "w-full text-left flex items-start gap-3 rounded-lg ring-1 px-4 py-3 transition-all",
-                  stateClass,
-                  submitted ? "cursor-default" : "active:scale-[0.99]",
-                )}
-              >
-                <span
+            if (submitted) {
+              if (isAnswer) {
+                box = "border-ok-line bg-ok-bg";
+                badge = "border-ok-line bg-ok-line/25 text-ok-fg";
+                mark = <Mark tone="ok">정답</Mark>;
+              } else if (isChosen) {
+                box = "border-err-line bg-err-bg";
+                badge = "border-err-line bg-err-line/25 text-err-fg";
+                mark = <Mark tone="err">선택</Mark>;
+              } else {
+                box = "border-hairline bg-canvas opacity-60";
+                badge = "border-hairline bg-surface text-ink-faint";
+              }
+            }
+
+            return (
+              <li key={i}>
+                <button
+                  type="button"
+                  disabled={submitted}
+                  onClick={() => onChoose(i)}
                   className={clsx(
-                    "mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-pill text-[11.5px] font-semibold shrink-0 transition-colors tracking-[-0.011em]",
-                    !submitted && "bg-parchment text-ink-muted",
-                    submitted && isAnswer && "bg-ok-line text-canvas",
-                    submitted && isChosen && !isAnswer && "bg-err-line text-canvas",
-                    submitted && !isAnswer && !isChosen && "bg-parchment text-ink-faint",
+                    "flex w-full items-start gap-3 rounded-sm border px-4 py-3 text-left transition-colors",
+                    box,
+                    submitted ? "cursor-default" : "cursor-pointer",
                   )}
                 >
-                  {ROMAN[i]}
-                </span>
-                <span className="flex-1 leading-relaxed">
-                  <Markdown proseSize="sm">{choice}</Markdown>
-                </span>
-                {suffix}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+                  <span
+                    className={clsx(
+                      "mt-[1px] inline-flex h-6 w-6 shrink-0 items-center justify-center",
+                      "rounded-sm border text-[13px] font-bold",
+                      badge,
+                    )}
+                  >
+                    {CHOICE_LABEL[i]}
+                  </span>
+                  {/* button 안이므로 inline 모드(블록 태그 금지) */}
+                  <span className="flex-1 text-[14.5px] leading-[1.65] text-ink md:text-[15px]">
+                    <Markdown inline>{choice}</Markdown>
+                  </span>
+                  {mark}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
-      {submitted && (
-        <div className="quiz-fade-up space-y-3">
-          <div
-            className={clsx(
-              "rounded-lg px-4 py-3 text-[14.5px] flex items-center gap-2 ring-1 tracking-[-0.011em]",
-              isCorrect
-                ? "bg-ok-bg text-ok-fg ring-ok-line"
-                : "bg-err-bg text-err-fg ring-err-line",
-            )}
-          >
-            <span className="text-[18px]">{isCorrect ? "🎉" : "🙅"}</span>
-            <span>
+        {submitted && (
+          <div className="quiz-fade-up space-y-3">
+            <p
+              className={clsx(
+                "rounded-sm border px-4 py-2.5 text-[14.5px] font-semibold",
+                isCorrect
+                  ? "border-ok-line bg-ok-bg text-ok-fg"
+                  : "border-err-line bg-err-bg text-err-fg",
+              )}
+            >
               {isCorrect
-                ? "정답입니다!"
-                : `오답입니다. 정답은 ${ROMAN[q.correct]}.`}
-            </span>
-          </div>
-          <div className="rounded-lg bg-parchment px-4 py-3 ring-1 ring-divider-soft">
-            <div className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink-muted mb-1">
-              📘 해설
+                ? "✓ 정답입니다."
+                : `✗ 오답입니다. 정답은 ${CHOICE_LABEL[q.correct]} 입니다.`}
+            </p>
+            <div className="rounded-sm border border-note-line bg-note-bg px-4 py-3">
+              <p className="mb-1 text-eyebrow uppercase text-note-fg">해설</p>
+              <Markdown proseSize="sm">{q.explanation}</Markdown>
             </div>
-            <Markdown proseSize="sm">{q.explanation}</Markdown>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </article>
+  );
+}
+
+function Mark({ tone, children }: { tone: "ok" | "err"; children: React.ReactNode }) {
+  return (
+    <span
+      className={clsx(
+        "mt-[3px] shrink-0 text-meta font-bold",
+        tone === "ok" ? "text-ok-fg" : "text-err-fg",
+      )}
+    >
+      {tone === "ok" ? "✓ " : "✗ "}
+      {children}
+    </span>
   );
 }
 
@@ -343,66 +393,126 @@ function ResultSummary({
   const pct = total === 0 ? 0 : Math.round((correct / total) * 100);
 
   const grade =
-    pct >= 90 ? { label: "Excellent", emoji: "🏆", tone: "text-ok-fg", glow: "quiz-flash-ok" } :
-    pct >= 70 ? { label: "Great", emoji: "🌟", tone: "text-action", glow: "quiz-flash-ok" } :
-    pct >= 50 ? { label: "Good", emoji: "👍", tone: "text-ink", glow: "" } :
-                { label: "Try Again", emoji: "📚", tone: "text-err-fg", glow: "quiz-flash-bad" };
+    pct >= 90
+      ? { label: "매우 우수", note: "기출을 바로 풀어도 되는 수준입니다.", glow: "quiz-flash-ok" }
+      : pct >= 70
+        ? { label: "양호", note: "틀린 분야만 위키에서 보강하면 충분합니다.", glow: "quiz-flash-ok" }
+        : pct >= 50
+          ? { label: "보통", note: "오답 분야를 위키에서 먼저 읽어 보세요.", glow: "" }
+          : { label: "보강 필요", note: "위키를 한 번 통독한 뒤 다시 도전해 보세요.", glow: "quiz-flash-bad" };
 
+  // 결과 인덱스가 아니라 qid 로 문항을 찾는다. 인덱스 매칭은 순서가 어긋나면 다른 문항이 붙는다.
+  const byId = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions]);
   const wrongs = useMemo(
     () =>
       results
-        .map((r, i) => ({ r, q: questions[i] }))
-        .filter(({ r }) => !r.correct),
-    [results, questions],
+        .filter((r) => !r.correct)
+        .map((r) => ({ r, q: byId.get(r.qid) }))
+        .filter((x): x is { r: RoundResult; q: QuizItem } => !!x.q),
+    [results, byId],
   );
 
-  return (
-    <div className="space-y-7">
-      <div className={clsx("surface-card p-9 md:p-12 text-center space-y-3", grade.glow)}>
-        <div className="text-[56px] leading-none">{grade.emoji}</div>
-        <div className="text-[11px] tracking-[0.25em] uppercase text-ink-muted font-medium">
-          {grade.label}
-        </div>
-        <div className={clsx("text-[44px] md:text-[56px] font-semibold tracking-[-0.018em] leading-none", grade.tone)}>
-          {correct} / {total}
-        </div>
-        <div className="text-ink-soft tracking-[-0.011em]">
-          정답률 <strong className="text-ink">{pct}%</strong>
-        </div>
-        <div className="flex flex-wrap justify-center gap-3 pt-3">
-          <button onClick={onRestart} className="btn-primary">
-            🔄 다시 풀기
-          </button>
-          <button onClick={onClose} className="btn-ghost">
-            ⏹ 종료
-          </button>
-        </div>
-      </div>
+  // 분야별 정답률
+  const byTopic = useMemo(() => {
+    const m = new Map<string, { ok: number; n: number }>();
+    for (const r of results) {
+      const q = byId.get(r.qid);
+      if (!q) continue;
+      const cur = m.get(q.topic) ?? { ok: 0, n: 0 };
+      cur.n += 1;
+      if (r.correct) cur.ok += 1;
+      m.set(q.topic, cur);
+    }
+    return [...m.entries()].sort((a, b) => a[1].ok / a[1].n - b[1].ok / b[1].n);
+  }, [results, byId]);
 
-      {wrongs.length > 0 && (
-        <div className="surface-card p-6 md:p-9 space-y-4">
-          <h2 className="text-[19px] md:text-[21px] font-semibold tracking-[-0.012em]">📚 오답 복습</h2>
-          <p className="text-[13.5px] text-ink-muted tracking-[-0.011em]">
-            틀린 {wrongs.length}문제를 다시 한 번 살펴보세요.
+  return (
+    <div className="space-y-6">
+      {/* 점수 */}
+      <section className={clsx("surface-card overflow-hidden", grade.glow)}>
+        <h2 className="border-b border-hairline bg-surface px-5 py-3 text-label text-ink md:px-7">
+          결과
+        </h2>
+        <div className="px-5 py-8 text-center md:px-7">
+          <p className="text-eyebrow uppercase text-crimson">{grade.label}</p>
+          <p className="mt-3 text-[44px] font-bold leading-none tabular-nums text-crimson md:text-[52px]">
+            {correct}
+            <span className="text-[24px] text-ink-faint"> / {total}</span>
           </p>
-          <div className="h-px bg-divider-soft" />
-          <ul className="space-y-3">
+          <p className="mt-3 text-[15px] text-ink-soft">
+            정답률 <strong className="tabular-nums text-ink">{pct}%</strong>
+          </p>
+          <p className="mt-1 text-[13.5px] text-ink-muted">{grade.note}</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <button type="button" onClick={onRestart} className="btn-primary">
+              다시 풀기
+            </button>
+            <button type="button" onClick={onClose} className="btn-ghost">
+              종료
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 분야별 성적 */}
+      {byTopic.length > 0 && (
+        <section className="surface-card overflow-hidden">
+          <h2 className="border-b border-hairline bg-surface px-5 py-3 text-label text-ink md:px-7">
+            분야별 성적
+          </h2>
+          <ul className="divide-y divide-divider-soft">
+            {byTopic.map(([topic, s]) => (
+              <li
+                key={topic}
+                className="flex items-center justify-between gap-4 px-5 py-2.5 md:px-7"
+              >
+                <span className="text-[14px] text-ink">{topic}</span>
+                <span
+                  className={clsx(
+                    "shrink-0 text-[13.5px] font-semibold tabular-nums",
+                    s.ok === s.n ? "text-ok-fg" : s.ok === 0 ? "text-err-fg" : "text-ink-soft",
+                  )}
+                >
+                  {s.ok} / {s.n}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* 오답 복습 */}
+      {wrongs.length > 0 && (
+        <section className="surface-card overflow-hidden">
+          <h2 className="border-b border-hairline bg-surface px-5 py-3 text-label text-ink md:px-7">
+            오답 복습 · {wrongs.length}문제
+          </h2>
+          <ul className="divide-y divide-hairline">
             {wrongs.map(({ r, q }) => (
-              <li key={r.qid} className="rounded-lg bg-parchment ring-1 ring-divider-soft px-5 py-4 space-y-2">
+              <li key={r.qid} className="space-y-3 px-5 py-5 md:px-7">
                 <div className="flex flex-wrap gap-2">
                   <span className="chip">{q.topic}</span>
-                  <span className="chip bg-err-bg text-err-fg ring-err-line">
-                    선택 {ROMAN[r.chosen]} → 정답 {ROMAN[q.correct]}
+                  <span className="chip border-err-line bg-err-bg text-err-fg">
+                    선택 {CHOICE_LABEL[r.chosen]} → 정답 {CHOICE_LABEL[q.correct]}
                   </span>
                 </div>
-                <Markdown proseSize="sm">{q.question}</Markdown>
-                <div className="rounded-md bg-canvas px-3 py-2 ring-1 ring-divider-soft">
+                <div className="text-[15px] leading-[1.7] text-ink">
+                  <Markdown proseSize="sm">{q.question}</Markdown>
+                </div>
+                <div className="rounded-sm border border-ok-line bg-ok-bg px-4 py-2.5">
+                  <p className="mb-1 text-eyebrow uppercase text-ok-fg">정답</p>
+                  <div className="text-[14px] text-ink">
+                    <Markdown proseSize="sm">{q.choices[q.correct]}</Markdown>
+                  </div>
+                </div>
+                <div className="rounded-sm border border-note-line bg-note-bg px-4 py-3">
+                  <p className="mb-1 text-eyebrow uppercase text-note-fg">해설</p>
                   <Markdown proseSize="sm">{q.explanation}</Markdown>
                 </div>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
     </div>
   );

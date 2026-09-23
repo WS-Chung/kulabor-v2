@@ -1,13 +1,15 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Apple 디자인 시스템 적용 (DESIGN-apple.md).
+ * 고려대학교 톤 디자인 시스템 (../DESIGN-ku.md).
  *
- * 핵심:
- * - 단일 Action Blue (#0066CC) 액센트, 그 외엔 모노크롬
- * - 그림자 없음 (hairline 테두리만), 편집 영역 카드는 18px 라운드
- * - SF Pro 대체로 Pretendard Variable 사용 (한글 최적화 + Apple 톤 호환)
- * - 본문 17px, letter-spacing -0.374px (Apple 식 ‘tight’ 헤드라인 톤)
+ * 색상값 출처: korea.ac.kr 의 w_layout.css / site_contents_Desktop.css 실측.
+ *
+ * 성격:
+ * - 각진 기관형. 모서리 2~4px, 그림자 없음, 1px 실선 경계만
+ * - 크림슨(#7c0019)은 액센트. 활성 탭·1차 버튼·강조선에만 좁게 사용
+ * - 웜 베이지(#f2eee7)가 유일한 유채색 배경
+ * - 본문 16px / 행간 1.7 — 긴 풀이를 읽는 화면이라 넉넉하게
  */
 const config: Config = {
   content: [
@@ -24,21 +26,12 @@ const config: Config = {
           "-apple-system",
           "BlinkMacSystemFont",
           "system-ui",
-          "SF Pro Text",
           "Apple SD Gothic Neo",
           "Noto Sans KR",
           "Malgun Gothic",
           "sans-serif",
         ],
-        display: [
-          "Pretendard Variable",
-          "Pretendard",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "SF Pro Display",
-          "system-ui",
-          "sans-serif",
-        ],
+        serif: ["Nanum Myeongjo", "Batang", "serif"],
         mono: [
           "ui-monospace",
           "SFMono-Regular",
@@ -47,132 +40,105 @@ const config: Config = {
           "monospace",
         ],
       },
+
       colors: {
-        // ── Apple Action Blue (단일 인터랙션 컬러) ─────
+        // ── 고려대 크림슨 ─────
+        crimson: {
+          DEFAULT: "#7c0019",
+          deep: "#5b1017",
+          bright: "#8b0029",
+          warm: "#7c121b",
+        },
+        // 이전 코드 호환용 별칭 (action = crimson)
         action: {
-          DEFAULT: "#0066CC",
-          focus: "#0071E3",
-          dark: "#2997FF", // 어두운 표면 위에서의 링크
+          DEFAULT: "#7c0019",
+          focus: "#8b0029",
+          deep: "#5b1017",
         },
 
         // ── 표면 ─────
-        canvas: "#FFFFFF",
-        parchment: "#F5F5F7",
-        pearl: "#FAFAFC",
-        tile: {
-          1: "#272729",
-          2: "#2A2A2C",
-          3: "#252527",
-        },
+        canvas: "#ffffff",
+        parchment: "#f2eee7",
+        surface: "#f7f7f7",
+        pearl: "#fafafa",
 
-        // ── 잉크(텍스트) ─────
+        // ── 잉크 ─────
         ink: {
-          DEFAULT: "#1D1D1F",
-          soft: "#333333",
-          muted: "#7A7A7A",
-          faint: "#B8B8B8",
+          DEFAULT: "#272727",
+          soft: "#4f4f4f",
+          muted: "#787878",
+          faint: "#b2b2b2",
         },
 
-        // ── Hairlines ─────
-        hairline: "#E0E0E0",
-        "divider-soft": "#F0F0F0",
-        chip: "#D2D2D7",
+        // ── 선 ─────
+        hairline: "#e5e5e5",
+        rule: "#d3d3d3",
+        "divider-soft": "#eeeeee",
+        tan: "#c9bb9f",
 
-        // ── 상태(서브) ─────
+        // ── 상태 ─────
         ok: {
-          bg: "#EEF6EC",
-          fg: "#1F5C2E",
-          line: "#BFDBB1",
-        },
-        warn: {
-          bg: "#FFF6E5",
-          fg: "#7C5300",
-          line: "#EFD392",
+          bg: "#eef4ec",
+          fg: "#2c5c33",
+          line: "#c3d8bd",
         },
         err: {
-          bg: "#FBEDE9",
-          fg: "#8B2A1B",
-          line: "#E6B0A2",
+          bg: "#fbecee",
+          fg: "#7c0019",
+          line: "#e8c3c9",
         },
-
-        // ── 호환성(이전 키 유지) ─────
-        // 점진 이행을 위해 기존 paper/sepia/amber 키도 매핑한다
-        paper: {
-          DEFAULT: "#FFFFFF",
-          50: "#FFFFFF",
-          100: "#FAFAFC",
-          200: "#F5F5F7",
-          300: "#EBEBED",
-          400: "#D2D2D7",
-        },
-        sepia: {
-          50: "#F5F5F7",
-          100: "#E0E0E0",
-          200: "#E0E0E0",
-          300: "#D2D2D7",
-          400: "#7A7A7A",
-        },
-        amber: {
-          warm: "#0066CC",
-        },
-        success: {
-          paper: "#EEF6EC",
-          ink: "#1F5C2E",
-          line: "#BFDBB1",
-        },
-        warning: {
-          paper: "#FFF6E5",
-          ink: "#7C5300",
-          line: "#EFD392",
-        },
-        error: {
-          paper: "#FBEDE9",
-          ink: "#8B2A1B",
-          line: "#E6B0A2",
+        note: {
+          bg: "#f2eee7",
+          fg: "#6b5a3e",
+          line: "#d9cdb4",
         },
       },
+
       borderRadius: {
-        sm: "8px",
-        DEFAULT: "11px",
-        md: "11px",
-        lg: "18px",
+        none: "0",
+        sm: "2px",
+        DEFAULT: "3px",
+        md: "4px",
+        lg: "6px",
         pill: "9999px",
       },
+
       fontSize: {
-        body: ["17px", { lineHeight: "1.47", letterSpacing: "-0.374px" }],
-        "body-strong": ["17px", { lineHeight: "1.24", letterSpacing: "-0.374px" }],
-        tagline: ["21px", { lineHeight: "1.19", letterSpacing: "0.231px" }],
-        "display-md": ["34px", { lineHeight: "1.18", letterSpacing: "-0.374px" }],
-        "display-lg": ["40px", { lineHeight: "1.10", letterSpacing: "-0.005em" }],
-        hero: ["56px", { lineHeight: "1.07", letterSpacing: "-0.018em" }],
-        caption: ["14px", { lineHeight: "1.43", letterSpacing: "-0.224px" }],
-        "caption-strong": ["14px", { lineHeight: "1.29", letterSpacing: "-0.224px" }],
-        fine: ["12px", { lineHeight: "1.4", letterSpacing: "-0.12px" }],
+        eyebrow: ["11px", { lineHeight: "1.3", letterSpacing: "0.18em", fontWeight: "700" }],
+        meta: ["12px", { lineHeight: "1.4", letterSpacing: "0.04em", fontWeight: "500" }],
+        label: ["13px", { lineHeight: "1.4", letterSpacing: "0.02em", fontWeight: "600" }],
+        body: ["16px", { lineHeight: "1.7", letterSpacing: "-0.003em" }],
+        "body-lg": ["17px", { lineHeight: "1.75", letterSpacing: "-0.003em" }],
+        title: ["19px", { lineHeight: "1.35", letterSpacing: "-0.01em", fontWeight: "600" }],
+        display: ["26px", { lineHeight: "1.25", letterSpacing: "-0.015em", fontWeight: "700" }],
+        hero: ["36px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
       },
+
       maxWidth: {
-        prose: "70ch",
+        prose: "72ch",
         narrow: "60rem",
-        page: "78rem",
+        page: "80rem",
       },
-      typography: ({ theme }: any) => ({
+
+      typography: ({ theme }: { theme: (path: string) => string }) => ({
         ink: {
           css: {
             "--tw-prose-body": theme("colors.ink.DEFAULT"),
             "--tw-prose-headings": theme("colors.ink.DEFAULT"),
             "--tw-prose-lead": theme("colors.ink.soft"),
-            "--tw-prose-links": theme("colors.action.DEFAULT"),
+            "--tw-prose-links": theme("colors.crimson.DEFAULT"),
             "--tw-prose-bold": theme("colors.ink.DEFAULT"),
             "--tw-prose-counters": theme("colors.ink.muted"),
-            "--tw-prose-bullets": theme("colors.hairline"),
-            "--tw-prose-hr": theme("colors.divider-soft"),
+            "--tw-prose-bullets": theme("colors.rule"),
+            "--tw-prose-hr": theme("colors.hairline"),
             "--tw-prose-quotes": theme("colors.ink.soft"),
-            "--tw-prose-quote-borders": theme("colors.action.DEFAULT"),
+            "--tw-prose-quote-borders": theme("colors.crimson.DEFAULT"),
             "--tw-prose-captions": theme("colors.ink.muted"),
             "--tw-prose-code": theme("colors.ink.DEFAULT"),
             "--tw-prose-pre-code": theme("colors.ink.DEFAULT"),
-            "--tw-prose-pre-bg": theme("colors.parchment"),
-            "--tw-prose-th-borders": theme("colors.hairline"),
-            "--tw-prose-td-borders": theme("colors.divider-soft"),
+            "--tw-prose-pre-bg": theme("colors.surface"),
+            "--tw-prose-th-borders": theme("colors.rule"),
+            "--tw-prose-td-borders": theme("colors.hairline"),
           },
         },
       }),

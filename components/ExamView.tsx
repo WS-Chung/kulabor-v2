@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { Markdown } from "./Markdown";
 import { MathBlock } from "./MathBlock";
-import { groupByYear, parseSemester, yearRange } from "@/lib/data";
+import { groupByYear, parseSemester } from "@/lib/data";
 import type { ExamSet, SubPart } from "@/lib/types";
 
 interface Props {
@@ -32,7 +32,6 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
   const [open, setOpen] = useState<Set<number>>(new Set());
 
   const years = useMemo(() => groupByYear(semesters), [semesters]);
-  const range = useMemo(() => yearRange(semesters), [semesters]);
   const current = parseSemester(semester);
 
   /** 현재 선택된 연도의 학기 목록. 연도 버튼을 누르면 이 줄만 바뀐다. */
@@ -101,14 +100,8 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
           <p className="eyebrow">Past Exams</p>
           <h1 className="page-title mt-2">기출문제 풀이</h1>
           <p className="page-lede">
-            연도와 학기를 고르고, 문항별로 <strong className="text-ink">문제</strong>를 먼저 읽은 뒤{" "}
-            <strong className="text-ink">풀이</strong>를 펼쳐 보세요.
-            {range && (
-              <>
-                {" "}
-                전체 {semesters.length}개 학기({range.min}–{range.max}학년도)를 수록했습니다.
-              </>
-            )}
+            연도 · 학기 · 문항 선택. <strong className="text-ink">문제</strong>와{" "}
+            <strong className="text-ink">풀이</strong> 영역 분리.
           </p>
         </div>
       </header>
@@ -170,7 +163,7 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
               })}
               {termsOfYear.length === 1 && (
                 <span className="self-center text-[12.5px] text-ink-muted">
-                  이 학년도는 1학기만 수록되어 있습니다.
+                  1학기만 수록
                 </span>
               )}
             </span>

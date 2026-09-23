@@ -166,8 +166,7 @@ function PageHead({ muted, onToggleMute }: { muted: boolean; onToggleMute: () =>
           </button>
         </div>
         <p className="page-lede max-w-2xl">
-          기출을 풀기 전에 배경지식이 갖춰졌는지 점검하는 도구입니다. 보기를 클릭하면 즉시 정·오와
-          해설이 표시되고, 마지막에 틀린 문항만 모아 다시 보여 드립니다.
+          기출 전 배경지식 점검. 보기 선택 시 즉시 채점, 종료 후 오답 복습.
         </p>
       </div>
     </header>
@@ -394,12 +393,12 @@ function ResultSummary({
 
   const grade =
     pct >= 90
-      ? { label: "매우 우수", note: "기출을 바로 풀어도 되는 수준입니다.", glow: "quiz-flash-ok" }
+      ? { label: "매우 우수", note: "기출 바로 시작 가능", glow: "quiz-flash-ok" }
       : pct >= 70
-        ? { label: "양호", note: "틀린 분야만 위키에서 보강하면 충분합니다.", glow: "quiz-flash-ok" }
+        ? { label: "양호", note: "틀린 분야만 배경지식 사전에서 보강", glow: "quiz-flash-ok" }
         : pct >= 50
-          ? { label: "보통", note: "오답 분야를 위키에서 먼저 읽어 보세요.", glow: "" }
-          : { label: "보강 필요", note: "위키를 한 번 통독한 뒤 다시 도전해 보세요.", glow: "quiz-flash-bad" };
+          ? { label: "보통", note: "오답 분야를 배경지식 사전에서 먼저 확인", glow: "" }
+          : { label: "보강 필요", note: "배경지식 사전 통독 후 재도전 권장", glow: "quiz-flash-bad" };
 
   // 결과 인덱스가 아니라 qid 로 문항을 찾는다. 인덱스 매칭은 순서가 어긋나면 다른 문항이 붙는다.
   const byId = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions]);

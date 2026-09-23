@@ -25,8 +25,8 @@ export default function HomePage() {
             <FeatureCard
               href="/wiki"
               step="02"
-              title="지식 위키"
-              desc="분야별 배경지식 사전. 일상 비유 → 정의 → 수식 순 정리."
+              title="배경지식 사전"
+              desc="분야별 개념 정리. 일상 비유 → 정의 → 수식 순 구성."
             />
             <FeatureCard
               href="/quiz"

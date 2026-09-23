@@ -6,9 +6,9 @@ import { clsx } from "clsx";
 import { useEffect, useState } from "react";
 
 const NAV = [
-  { href: "/exams", label: "기출문제 풀이" },
-  { href: "/wiki", label: "지식 위키" },
-  { href: "/quiz", label: "자가진단 테스트" },
+  { href: "/exams", no: "01", label: "기출문제 풀이" },
+  { href: "/wiki", no: "02", label: "배경지식 사전" },
+  { href: "/quiz", no: "03", label: "자가진단 테스트" },
 ];
 
 /**
@@ -78,6 +78,15 @@ export function Sidebar() {
                       aria-current={active ? "page" : undefined}
                       className={clsx("nav-item", active && "nav-item-active")}
                     >
+                      <span
+                        aria-hidden
+                        className={clsx(
+                          "shrink-0 text-[13px] font-bold tabular-nums",
+                          active ? "text-crimson/70" : "text-ink-faint",
+                        )}
+                      >
+                        {item.no}
+                      </span>
                       <span className="text-[17px] font-semibold leading-[1.4]">
                         {item.label}
                       </span>
@@ -87,14 +96,6 @@ export function Sidebar() {
               })}
             </ul>
           </nav>
-
-          {/* 각주 */}
-          <div className="mt-auto border-t border-hairline px-6 py-5">
-            <p className="text-[11.5px] leading-[1.6] text-ink-faint">
-              학습용 정리본입니다. 논술형 문항은 답안 개요 형태로 제공하므로 실제 답안 작성 시
-              강의안과 교차 확인하세요.
-            </p>
-          </div>
         </div>
       </aside>
 

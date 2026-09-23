@@ -12,7 +12,7 @@ interface Props {
 }
 
 /**
- * 지식 위키.
+ * 배경지식 사전.
  *
  * 카테고리가 14개로 늘어나 알약형 버튼을 나열하면 줄바꿈이 지저분해진다.
  * 그래서 좌측에 목차 열을, 우측에 본문을 두는 2열 구성으로 바꿨다.
@@ -23,10 +23,6 @@ export function WikiView({ categories, items }: Props) {
   const [open, setOpen] = useState<Set<number>>(new Set());
 
   const list = items[cat] ?? [];
-  const total = useMemo(
-    () => categories.reduce((acc, c) => acc + (items[c]?.length ?? 0), 0),
-    [categories, items],
-  );
 
   function switchCat(c: string) {
     setCat(c);
@@ -50,10 +46,9 @@ export function WikiView({ categories, items }: Props) {
       <header className="page-head">
         <div className="page-head-inner">
           <p className="eyebrow">Knowledge Base</p>
-          <h1 className="page-title mt-2">지식 위키</h1>
+          <h1 className="page-title mt-2">배경지식 사전</h1>
           <p className="page-lede max-w-2xl">
-            기출을 풀다 막히면 여기로. 일상 비유 → 정의 → 수식 순서로 정리했고, 각 항목이 어느 학기
-            어느 문항에 쓰이는지 표시했습니다. 전체 {categories.length}개 분야 {total}개 항목.
+            분야별 개념 정리. 일상 비유 → 정의 → 수식 순 구성.
           </p>
         </div>
       </header>

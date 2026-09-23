@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   },
   description:
     "노동경제학과 기출문제 31개 학기를 비전공자도 따라갈 수 있게 단계별로 풀이하고, "
-    + "배경지식 위키와 자가진단 테스트를 제공합니다.",
+    + "배경지식 사전과 자가진단 테스트를 제공합니다.",
   applicationName: "노동대학원 졸업시험 대비",
   keywords: [
     "노동경제학",

@@ -28,6 +28,17 @@
   --rule: #d3d3d3;
   --divider-soft: #eeeeee;
   --tan: #c9bb9f;
+
+  /* 크림 음영 띠의 높이.
+     좌측 사이드바 브랜드 블록(.brand-band)과 본문 페이지 헤더(.page-head-inner)가
+     이 값을 함께 써서 두 띠의 아래 경계선이 한 줄로 이어지게 한다. */
+  --band-h: 156px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --band-h: 228px;
+  }
 }
 
 html,
@@ -78,9 +89,19 @@ h4 {
     @apply bg-parchment border-b border-hairline;
   }
   /* 모바일에서는 좌상단에 '☰ 메뉴' 버튼이 고정(top 12, 높이 36)되어 있으므로
-     헤더 첫 줄이 그 아래에서 시작하도록 위 여백을 키운다. */
+     헤더 첫 줄이 그 아래에서 시작하도록 위 여백을 키운다.
+     높이는 --band-h 로 고정해 사이드바 브랜드 블록과 아래 경계선을 맞춘다. */
   .page-head-inner {
-    @apply mx-auto max-w-page px-6 md:px-10 pt-14 pb-8 md:py-11;
+    @apply mx-auto flex max-w-page flex-col justify-center px-6 md:px-10 pt-14 pb-8 md:py-0;
+    /* .page-head 의 1px 아래 경계선을 포함해 --band-h 가 되도록 1px 뺀다.
+       (.brand-band 는 자기 자신에 경계선이 있어 border-box 로 이미 포함된다) */
+    min-height: calc(var(--band-h) - 1px);
+  }
+
+  /* 사이드바 브랜드 블록. .page-head-inner 와 같은 높이를 쓴다. */
+  .brand-band {
+    @apply flex flex-col justify-center border-b border-hairline bg-parchment px-6 pt-14 pb-6 md:py-0;
+    min-height: var(--band-h);
   }
   .page-title {
     @apply text-[28px] md:text-hero font-bold text-ink;
@@ -178,7 +199,7 @@ h4 {
 
   /* ── 사이드바 / 내비게이션 ── */
   .nav-item {
-    @apply flex items-center gap-3 rounded-sm px-3 py-2 text-[14.5px] text-ink-soft
+    @apply flex items-center gap-3 rounded-sm px-3 py-3 text-[17px] text-ink-soft
            hover:bg-pearl hover:text-ink transition-colors;
   }
   .nav-item-active {

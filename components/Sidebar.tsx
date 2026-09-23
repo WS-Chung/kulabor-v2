@@ -6,9 +6,9 @@ import { clsx } from "clsx";
 import { useEffect, useState } from "react";
 
 const NAV = [
-  { href: "/exams", label: "기출문제 풀이", desc: "31개 학기 · 문제와 풀이 분리" },
-  { href: "/wiki", label: "지식 위키", desc: "14개 분야 배경지식 사전" },
-  { href: "/quiz", label: "자가진단 테스트", desc: "50문제 풀에서 랜덤 20문제" },
+  { href: "/exams", label: "기출문제 풀이" },
+  { href: "/wiki", label: "지식 위키" },
+  { href: "/quiz", label: "자가진단 테스트" },
 ];
 
 /**
@@ -53,30 +53,22 @@ export function Sidebar() {
         )}
       >
         <div className="flex min-h-screen flex-col">
-          {/* 브랜드 */}
-          <div className="border-b border-hairline bg-parchment px-6 pb-6 pt-14 md:pt-8">
+          {/* 브랜드 — 높이는 .brand-band 가 본문 헤더(.page-head-inner)와 공유한다 */}
+          <div className="brand-band">
             <Link href="/" className="block">
               <p className="text-eyebrow uppercase text-crimson">Korea University</p>
-              <p className="mt-2 text-[20px] font-bold leading-[1.3] tracking-[-0.015em] text-ink">
-                노동경제학
+              <p className="mt-2 text-[22px] font-bold leading-[1.3] tracking-[-0.015em] text-ink">
+                노동대학원
                 <br />
-                기출 학습
+                졸업시험 대비
               </p>
-              <span
-                aria-hidden
-                className="mt-3 block h-[2px] w-9 bg-crimson"
-              />
-              <p className="mt-3 text-[12.5px] leading-[1.55] text-ink-muted">
-                경제학을 전공하지 않아도
-                <br />
-                따라갈 수 있게.
-              </p>
+              <span aria-hidden className="mt-3 block h-[2px] w-9 bg-crimson" />
             </Link>
           </div>
 
           {/* 내비게이션 */}
-          <nav aria-label="주요 메뉴" className="flex-1 px-3 py-4">
-            <ul className="space-y-1">
+          <nav aria-label="주요 메뉴" className="flex-1 px-3 py-5">
+            <ul className="space-y-1.5">
               {NAV.map((item) => {
                 const active = matches(item.href);
                 return (
@@ -86,16 +78,8 @@ export function Sidebar() {
                       aria-current={active ? "page" : undefined}
                       className={clsx("nav-item", active && "nav-item-active")}
                     >
-                      <span className="flex flex-col gap-0.5">
-                        <span className="text-[14.5px] font-semibold">{item.label}</span>
-                        <span
-                          className={clsx(
-                            "text-[11.5px]",
-                            active ? "text-crimson/70" : "text-ink-muted",
-                          )}
-                        >
-                          {item.desc}
-                        </span>
+                      <span className="text-[17px] font-semibold leading-[1.4]">
+                        {item.label}
                       </span>
                     </Link>
                   </li>

@@ -197,6 +197,68 @@ h4 {
     @apply rounded-sm border-l-[3px] border-ok-line bg-ok-bg text-ok-fg px-4 py-3;
   }
 
+  /* 숫자 예시 — 단계·요약 답 안에 붙는 흰 상자. 점선 탠 테두리로 본문과 구분 */
+  .example-block {
+    @apply mt-3 rounded-sm border border-dashed border-tan bg-canvas px-3.5 py-2.5 text-ink;
+  }
+  .example-label {
+    @apply mb-1 text-eyebrow uppercase text-crimson-deep;
+  }
+
+  /* ── 기호 해설 목록 (문제 영역 아래, 기본 접힘) ── */
+  .glossary-legend {
+    @apply mt-3 rounded-md border border-hairline bg-canvas;
+  }
+  .glossary-legend-summary {
+    @apply flex cursor-pointer flex-wrap items-center gap-x-2.5 gap-y-1 px-4 py-2.5
+           text-[14px] select-none;
+  }
+  .glossary-legend-summary::before {
+    content: "▸";
+    @apply text-crimson text-[12px] transition-transform;
+  }
+  .glossary-legend[open] > .glossary-legend-summary::before {
+    transform: rotate(90deg);
+  }
+  .glossary-legend-summary::-webkit-details-marker {
+    display: none;
+  }
+  .glossary-legend-list {
+    @apply grid grid-cols-1 gap-x-6 gap-y-3 border-t border-divider-soft px-4 py-3.5 md:grid-cols-2;
+  }
+
+  /* ── 기호 해설 툴팁 (커서를 따라다님) ── */
+  .glossary-tip {
+    @apply rounded-md border border-hairline bg-canvas px-3.5 py-3 shadow-lg;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 60;
+    width: max-content;
+    max-width: min(330px, calc(100vw - 16px));
+    pointer-events: none;
+    border-top: 2px solid var(--crimson);
+  }
+  .glossary-tip-head {
+    @apply mb-1 flex items-baseline gap-2;
+  }
+  .glossary-tip-sym {
+    @apply shrink-0 text-[17px] text-crimson;
+  }
+  .glossary-tip-name {
+    @apply text-[14px] font-bold text-ink;
+  }
+  .glossary-tip-desc {
+    @apply text-[13.5px] leading-[1.6] text-ink-soft;
+  }
+  .glossary-tip-ex {
+    @apply mt-2 border-t border-divider-soft pt-2 text-[13px] leading-[1.6] text-ink;
+  }
+  .glossary-tip-ex-label {
+    @apply mr-1.5 inline-flex h-[18px] items-center rounded-sm bg-crimson/10 px-1.5
+           text-[11px] font-bold text-crimson align-[1px];
+  }
+
   /* ── 사이드바 / 내비게이션 ── */
   .nav-item {
     @apply flex items-center gap-3 rounded-sm px-3 py-3 text-[17px] text-ink-soft
@@ -251,6 +313,22 @@ h4 {
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 2px;
+}
+
+/* 기호 해설이 붙은 기호 (\htmlData{g=…} → data-g). hover/탭 시 옅은 크림슨 배경 */
+.katex [data-g] {
+  cursor: help;
+  border-radius: 2px;
+  transition: background-color 0.12s ease;
+}
+.katex [data-g]:hover,
+.katex [data-g].g-active {
+  background-color: rgba(124, 0, 25, 0.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .katex [data-g] {
+    transition: none;
+  }
 }
 
 /* 아코디언 헤더 등 한 줄 자리에 들어가는 수식은 블록으로 벌어지지 않게 한다 */

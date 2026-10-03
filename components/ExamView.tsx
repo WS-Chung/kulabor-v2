@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { Markdown } from "./Markdown";
 import { MathBlock } from "./MathBlock";
@@ -31,8 +31,11 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
   const first = initialKey ?? semesters[0];
   const [semester, setSemester] = useState<string>(first);
   const [tab, setTab] = useState(0);
-  /** 하위문항 아코디언의 열림 상태. 인덱스 집합. */
-  const [open, setOpen] = useState<Set<number>>(new Set());
+  /**
+   * 하위문항별 펼침 상태. 단계별 풀이(직관 + 단계)와 요약 풀이를 따로 연다.
+   * 요약 풀이만 훑어보거나, 단계별 풀이만 따라가며 공부할 수 있게 하기 위해서다.
+   */
+  const [open, setOpen] = useState<OpenState>(EMPTY_OPEN);
 
   const years = useMemo(() => groupByYear(semesters), [semesters]);
   const current = parseSemester(semester);
@@ -60,7 +63,7 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
   function switchSemester(key: string) {
     setSemester(key);
     setTab(0);
-    setOpen(new Set());
+    setOpen(EMPTY_OPEN);
   }
 
   /**
@@ -76,23 +79,33 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
 
   function switchTab(i: number) {
     setTab(i);
-    setOpen(new Set());
+    setOpen(EMPTY_OPEN);
   }
 
-  function toggle(i: number) {
+  function toggle(part: Part, i: number) {
     setOpen((prev) => {
-      const next = new Set(prev);
+      const next = new Set(prev[part]);
       if (next.has(i)) next.delete(i);
       else next.add(i);
-      return next;
+      return { ...prev, [part]: next };
     });
   }
 
-  const allOpen = q ? open.size === q.subparts.length && q.subparts.length > 0 : false;
+  /** 각 부분을 가진 하위문항 인덱스. '모두 펼치기'의 기준이 된다. */
+  const has = useMemo(
+    () => ({
+      steps: (q?.subparts ?? []).flatMap((sp, i) => (hasSteps(sp) ? [i] : [])),
+      answer: (q?.subparts ?? []).flatMap((sp, i) => (sp.answer ? [i] : [])),
+    }),
+    [q],
+  );
 
-  function toggleAll() {
-    if (!q) return;
-    setOpen(allOpen ? new Set() : new Set(q.subparts.map((_, i) => i)));
+  const allOpen = (part: Part) =>
+    has[part].length > 0 && has[part].every((i) => open[part].has(i));
+
+  function toggleAll(part: Part) {
+    const close = allOpen(part);
+    setOpen((prev) => ({ ...prev, [part]: close ? new Set<number>() : new Set(has[part]) }));
   }
 
   return (
@@ -274,13 +287,30 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
                     <div className="flex items-center gap-3">
                       <span className="band band-solution">풀이</span>
                       <p className="text-[13.5px] text-ink-muted">
-                        직관 → 단계별 전개 → 요약 답
+                        단계별 풀이 · 요약 풀이 따로 펼치기
                       </p>
                     </div>
                     {q.subparts.length > 1 && (
-                      <button type="button" onClick={toggleAll} className="btn-ghost">
-                        {allOpen ? "모두 접기" : "모두 펼치기"}
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        {has.steps.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => toggleAll("steps")}
+                            className="btn-ghost"
+                          >
+                            {allOpen("steps") ? "단계별 풀이 모두 접기" : "단계별 풀이 모두 펼치기"}
+                          </button>
+                        )}
+                        {has.answer.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => toggleAll("answer")}
+                            className="btn-ghost"
+                          >
+                            {allOpen("answer") ? "요약 풀이 모두 접기" : "요약 풀이 모두 펼치기"}
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -289,8 +319,9 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
                       <SolutionCard
                         key={i}
                         sub={sp}
-                        open={open.has(i)}
-                        onToggle={() => toggle(i)}
+                        stepsOpen={open.steps.has(i)}
+                        answerOpen={open.answer.has(i)}
+                        onToggle={(part) => toggle(part, i)}
                       />
                     ))}
                   </div>
@@ -322,35 +353,80 @@ function SubLabel({ label }: { label: string }) {
   );
 }
 
-/** 하위문항 하나의 풀이. 접힘/펼침 상태를 부모가 관리한다. */
+/** 풀이의 두 부분. steps = 직관 + 단계별 전개, answer = 요약 풀이(+ 숫자 예시). */
+type Part = "steps" | "answer";
+type OpenState = Record<Part, Set<number>>;
+const EMPTY_OPEN: OpenState = { steps: new Set(), answer: new Set() };
+
+function hasSteps(sp: SubPart): boolean {
+  return Boolean(sp.intuition) || Boolean(sp.steps && sp.steps.length > 0);
+}
+
+/**
+ * 하위문항 하나의 풀이. 펼침 상태는 부모가 관리한다.
+ *
+ * 머리줄(라벨 + 문제)은 버튼이 아니다. 그 아래 두 토글 버튼으로 단계별 풀이와 요약 풀이를
+ * 각각 연다. 둘 다 열면 '직관 → 단계별 전개 → 요약 풀이' 순서로 이어진다.
+ */
 function SolutionCard({
   sub,
-  open,
+  stepsOpen,
+  answerOpen,
   onToggle,
 }: {
   sub: SubPart;
-  open: boolean;
-  onToggle: () => void;
+  stepsOpen: boolean;
+  answerOpen: boolean;
+  onToggle: (part: Part) => void;
 }) {
+  const id = useId();
+  const stepsId = `${id}-steps`;
+  const answerId = `${id}-answer`;
+  const showSteps = hasSteps(sub);
+
   return (
     <div className="exam-solution">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="flex w-full items-start gap-3 text-left"
-      >
+      <div className="flex items-start gap-3">
         <SubLabel label={sub.label} />
         <span className="flex-1 text-[14.5px] md:text-[15px] leading-[1.6] text-ink-soft">
           <Markdown inline>{sub.question}</Markdown>
         </span>
-        <span className="mt-[3px] shrink-0 text-meta text-crimson">
-          {open ? "접기 ▲" : "풀이 보기 ▼"}
-        </span>
-      </button>
+      </div>
 
-      {open && (
-        <div className="quiz-fade-up mt-4 space-y-3 border-t border-divider-soft pt-4">
+      <div className="sol-toggles">
+        {showSteps && (
+          <button
+            type="button"
+            onClick={() => onToggle("steps")}
+            aria-expanded={stepsOpen}
+            aria-controls={stepsOpen ? stepsId : undefined}
+            className="sol-toggle"
+          >
+            {stepsOpen ? "단계별 풀이 접기" : "단계별 풀이 펼치기"}
+            <span aria-hidden className="sol-toggle-icon">{stepsOpen ? "▲" : "▼"}</span>
+          </button>
+        )}
+        {sub.answer && (
+          <button
+            type="button"
+            onClick={() => onToggle("answer")}
+            aria-expanded={answerOpen}
+            aria-controls={answerOpen ? answerId : undefined}
+            className="sol-toggle"
+          >
+            {answerOpen ? "요약 풀이 접기" : "요약 풀이 펼치기"}
+            <span aria-hidden className="sol-toggle-icon">{answerOpen ? "▲" : "▼"}</span>
+          </button>
+        )}
+      </div>
+
+      {showSteps && stepsOpen && (
+        <div
+          id={stepsId}
+          role="region"
+          aria-label="단계별 풀이"
+          className="quiz-fade-up mt-4 space-y-3 border-t border-divider-soft pt-4"
+        >
           {sub.intuition && (
             <div className="intuition-block">
               <p className="mb-1 text-eyebrow uppercase opacity-80">직관 · 쉬운 비유</p>
@@ -375,14 +451,25 @@ function SolutionCard({
               </ol>
             </div>
           )}
+        </div>
+      )}
 
-          {sub.answer && (
-            <div className="answer-block">
-              <p className="mb-1 text-eyebrow uppercase opacity-80">요약 답</p>
-              <Markdown proseSize="sm">{sub.answer}</Markdown>
-              {sub.answerExample && <ExampleBlock>{sub.answerExample}</ExampleBlock>}
-            </div>
+      {sub.answer && answerOpen && (
+        <div
+          id={answerId}
+          role="region"
+          aria-label="요약 풀이"
+          className={clsx(
+            "quiz-fade-up mt-4",
+            // 단계별 풀이가 열려 있으면 그 아래 이어 붙이고, 아니면 구분선부터 시작한다
+            !(showSteps && stepsOpen) && "border-t border-divider-soft pt-4",
           )}
+        >
+          <div className="answer-block">
+            <p className="mb-1 text-eyebrow uppercase opacity-80">요약 풀이</p>
+            <Markdown proseSize="sm">{sub.answer}</Markdown>
+            {sub.answerExample && <ExampleBlock>{sub.answerExample}</ExampleBlock>}
+          </div>
         </div>
       )}
     </div>

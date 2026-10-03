@@ -178,6 +178,22 @@ h4 {
            px-4 py-4 md:px-6 md:py-5;
   }
 
+  /* 풀이 카드의 '단계별 풀이 / 요약 풀이' 토글. 문제 라벨(24px + 간격 12px) 만큼 들여 맞춘다 */
+  .sol-toggles {
+    @apply mt-3 flex flex-wrap gap-2 md:pl-9;
+  }
+  .sol-toggle {
+    @apply inline-flex items-center gap-1.5 rounded-sm border border-hairline bg-surface
+           px-3 py-1.5 text-[13.5px] font-semibold text-ink-soft
+           hover:border-crimson/40 hover:bg-pearl hover:text-ink transition-colors;
+  }
+  .sol-toggle[aria-expanded="true"] {
+    @apply border-crimson/40 bg-crimson/10 text-crimson;
+  }
+  .sol-toggle-icon {
+    @apply text-[10px];
+  }
+
   /* 문제와 풀이 사이 강한 구분선 */
   .divider-strong {
     @apply h-px w-full bg-rule;

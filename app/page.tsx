@@ -20,7 +20,7 @@ export default function HomePage() {
               href="/exams"
               step="01"
               title="기출문제 풀이"
-              desc="문제와 풀이를 분리 제시. 풀이는 직관 → 단계별 전개 → 요약 답."
+              desc="문제와 풀이를 분리 제시. 풀이는 단계별 풀이와 요약 풀이로 구분."
             />
             <FeatureCard
               href="/wiki"
@@ -44,7 +44,7 @@ export default function HomePage() {
           </h2>
           <ul className="divide-y divide-divider-soft">
             <Note step="1">연도 선택 → 학기 선택 → 문항 선택</Note>
-            <Note step="2">풀이는 기본 접힘 상태. 클릭해서 펼쳐 확인</Note>
+            <Note step="2">풀이는 기본 접힘 상태. 단계별 풀이·요약 풀이를 각각 펼쳐 확인</Note>
           </ul>
         </section>
       </div>

@@ -2,12 +2,14 @@
 import examsRaw from "@/data/exams.json";
 import wikiRaw from "@/data/wiki.json";
 import quizRaw from "@/data/quiz.json";
+import glossaryRaw from "@/data/glossary.json";
 
-import type { ExamsPayload, WikiPayload, QuizItem } from "./types";
+import type { ExamsPayload, WikiPayload, QuizItem, GlossaryPayload } from "./types";
 
 export const examsData = examsRaw as unknown as ExamsPayload;
 export const wikiData = wikiRaw as unknown as WikiPayload;
 export const quizData = quizRaw as unknown as QuizItem[];
+export const glossaryData = glossaryRaw as unknown as GlossaryPayload;
 
 /** 학기 키를 URL slug로 변환(2025-1학기 → 2025-1). */
 export function semesterToSlug(key: string): string {

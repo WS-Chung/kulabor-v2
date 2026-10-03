@@ -6,6 +6,7 @@ import remarkMath from "remark-math";
 import remarkBreaks from "remark-breaks";
 import rehypeKatex from "rehype-katex";
 import { clsx } from "clsx";
+import { KATEX_OPTIONS } from "@/lib/katex";
 
 interface MarkdownProps {
   children: string;
@@ -25,7 +26,7 @@ interface MarkdownProps {
  * 여러 줄이 한 문단으로 뭉쳐 읽히지 않는다. (exams.json 708곳, wiki.json 46곳)
  */
 const REMARK = [remarkGfm, remarkMath, remarkBreaks];
-const REHYPE = [[rehypeKatex, { strict: "ignore", throwOnError: false }]] as const;
+const REHYPE = [[rehypeKatex, KATEX_OPTIONS]] as const;
 
 /** 인라인 모드용 태그 치환. p는 없애고, 블록 수식 래퍼 div는 span으로 낮춘다. */
 const INLINE_COMPONENTS: Components = {

@@ -55,6 +55,28 @@
   자리에 씁니다. `<p>`·`<div>` 를 phrasing content 로 낮추고, `1. `·`- ` 같은 줄머리
   블록 문법을 이스케이프해 문자 그대로 보이게 합니다.
 
+### 기호 해설 툴팁과 숫자 예시 (강화 문항)
+
+현재 강화된 문항: 2026-1 문항 1·2·3, 그리고 같은 템플릿을 쓰는 2025-2 문항 1(EITC)·2025-1 문항 3(DiD).
+
+- **기호 해설**: 빌드가 수식 속 기호를 `\htmlData{g=<id>}{기호}` 로 감싸고, 설명은
+  `data/glossary.json` 에 둡니다. 화면에서는 `data-g` span 이 되고 `GlossaryTooltip` 이
+  커서를 따라다니며 설명을 띄웁니다(터치는 탭). 같은 내용이 문제 영역 아래 접힌
+  '기호 해설' 목록에도 있어 키보드·화면낭독기로도 읽을 수 있습니다.
+  KaTeX `trust` 는 `\htmlData` 하나만 허용합니다(`lib/katex.ts`).
+- **숫자 예시**: 각 풀이 단계의 `example`, 요약 답의 `answerExample`. 변수로 쓴 풀이 아래에
+  '숫자 예시' 상자로 덧붙습니다. 예시 수치는 문항마다 하나로 통일했습니다
+  (EITC 시급 \$10·4,000시간 / 통계 공정한 주사위 μ=3.5, σ²=35/12 / DiD Card·Krueger 식당당 평균 고용).
+
+다른 문항으로 넓히는 절차:
+
+1. 템플릿 함수의 각 `step(...)` 에 `example=`, 반환 dict 에 `answer_example=` 추가
+2. `data_glossary.py` 에 해당 아키타입의 용어 세트 추가 (id 접두사로 문항 간 의미 구분)
+3. `data_*.py` 의 `q(...)` 에 `terms=G.<세트>` 지정
+4. `python -m src_authoring.build` — `terms` 가 붙은 문항은 **설명 없는 기호가 남거나 예시가 빠지면
+   빌드가 실패**하며 어떤 기호가 남았는지 알려 줍니다
+5. `npm run check:math` — 모든 수식을 앱과 같은 KaTeX 옵션으로 렌더해 파스 오류를 찾습니다
+
 **통화 기호는 반드시 `\$` 로 이스케이프하고 수식 밖에 씁니다.**
 `$...$` 안쪽에서는 `\$` 가 이스케이프로 동작하지 않아 수식이 조기 종료되고 KaTeX 파스
 오류가 납니다. `python -m src_authoring.lint_math` 가 이 실수를 잡습니다.
@@ -79,16 +101,20 @@ deploy/
 │   ├── Sidebar.tsx
 │   ├── Markdown.tsx         # 마크다운 + 수식 렌더러 (inline 모드 포함)
 │   ├── MathBlock.tsx        # 디스플레이 수식 단일 블록
-│   ├── ExamView.tsx         # 학년도/학기 내비 + 문제·풀이 분리
+│   ├── ExamView.tsx         # 학년도/학기 내비 + 문제·풀이 분리 + 숫자 예시·기호 해설 목록
+│   ├── GlossaryTooltip.tsx  # 커서를 따라다니는 기호 해설 툴팁
 │   ├── WikiView.tsx         # 좌측 목차 열 + 우측 본문
 │   └── QuizView.tsx
 ├── data/                    # ⚠ 생성물. 직접 편집 금지
 │   ├── exams.json
+│   ├── glossary.json        # 수식 기호 해설 (id → 이름·설명·숫자 예)
 │   ├── wiki.json
 │   └── quiz.json
+├── scripts/check-katex.mjs  # npm run check:math
 ├── lib/
 │   ├── data.ts              # JSON 로더 + 학기 파싱/연도 그룹화 유틸
 │   ├── types.ts             # 공통 타입 (JSON 스키마의 근거)
+│   ├── katex.ts             # KaTeX 공통 옵션 (trust: \htmlData 만 허용)
 │   └── audio.ts             # 퀴즈 정답·오답 효과음 (WebAudio)
 └── public/eitc_graph.png    # PDF 페이지에서 재추출한 EITC 예산선 그래프
 ```
@@ -127,9 +153,10 @@ JSON 을 직접 고치면 다음 빌드에서 덮어써집니다.
 
 ```bash
 cd ..
-python -m src_authoring.build       # exams.json + wiki.json + quiz.json 생성
-python -m src_authoring.verify      # 스키마·필수필드·이미지 참조 검증
+python -m src_authoring.build       # exams·glossary·wiki·quiz.json 생성
+python -m src_authoring.verify      # 스키마·필수필드·기호 해설 일관성·이미지 참조 검증
 python -m src_authoring.lint_math   # 수식 구획 무결성
+cd deploy && npm run check:math     # 모든 수식 KaTeX 렌더 검사
 ```
 
 | 하고 싶은 일 | 고칠 파일 |

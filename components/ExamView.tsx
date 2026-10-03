@@ -4,12 +4,15 @@ import { useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { Markdown } from "./Markdown";
 import { MathBlock } from "./MathBlock";
+import { GlossaryTooltip, TexInline } from "./GlossaryTooltip";
 import { groupByYear, parseSemester } from "@/lib/data";
-import type { ExamSet, SubPart } from "@/lib/types";
+import type { ExamSet, GlossaryPayload, SubPart } from "@/lib/types";
 
 interface Props {
   semesters: string[];
   exams: Record<string, ExamSet>;
+  /** 수식 기호 해설 (id → 설명). 문항의 `glossary` 목록이 여기를 가리킨다. */
+  glossary: GlossaryPayload;
   initialKey?: string;
 }
 
@@ -24,7 +27,7 @@ interface Props {
  *    풀이 = 흰 바탕 + 회색 경계(.exam-solution)
  *    두 영역 사이에 굵은 구분선(.divider-strong)과 넉넉한 여백을 둔다.
  */
-export function ExamView({ semesters, exams, initialKey }: Props) {
+export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
   const first = initialKey ?? semesters[0];
   const [semester, setSemester] = useState<string>(first);
   const [tab, setTab] = useState(0);
@@ -94,6 +97,8 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
 
   return (
     <div>
+      <GlossaryTooltip terms={glossary} />
+
       {/* ───────── 페이지 헤더 ───────── */}
       <header className="page-head">
         <div className="page-head-inner">
@@ -254,6 +259,10 @@ export function ExamView({ semesters, exams, initialKey }: Props) {
                       </ol>
                     )}
                   </div>
+
+                  {q.glossary && q.glossary.length > 0 && (
+                    <GlossaryLegend key={q.id} ids={q.glossary} terms={glossary} />
+                  )}
                 </section>
 
                 {/* ═══════ 구분선 ═══════ */}
@@ -360,6 +369,7 @@ function SolutionCard({
                     </p>
                     <Markdown proseSize="sm">{st.body}</Markdown>
                     {st.math && <MathBlock tex={st.math} />}
+                    {st.example && <ExampleBlock>{st.example}</ExampleBlock>}
                   </li>
                 ))}
               </ol>
@@ -370,10 +380,60 @@ function SolutionCard({
             <div className="answer-block">
               <p className="mb-1 text-eyebrow uppercase opacity-80">요약 답</p>
               <Markdown proseSize="sm">{sub.answer}</Markdown>
+              {sub.answerExample && <ExampleBlock>{sub.answerExample}</ExampleBlock>}
             </div>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+/** 변수로 쓴 풀이 아래에 붙는 '숫자 예시'. 풀이를 대체하지 않고 덧붙인다. */
+function ExampleBlock({ children }: { children: string }) {
+  return (
+    <div className="example-block">
+      <p className="example-label">숫자 예시</p>
+      <Markdown proseSize="sm">{children}</Markdown>
+    </div>
+  );
+}
+
+/**
+ * 문항의 기호 해설 목록. 기본은 접힘.
+ *
+ * hover 툴팁은 마우스가 있어야 보이고 화면낭독기로는 읽히지 않는다.
+ * 같은 내용을 여기에 펼쳐 두어 키보드·화면낭독기 사용자도 접근할 수 있게 한다.
+ */
+function GlossaryLegend({ ids, terms }: { ids: string[]; terms: GlossaryPayload }) {
+  const list = ids.flatMap((id) => (terms[id] ? [[id, terms[id]] as const] : []));
+  if (list.length === 0) return null;
+  return (
+    <details className="glossary-legend">
+      <summary className="glossary-legend-summary">
+        <span className="font-semibold text-ink">기호 해설</span>
+        <span className="chip">{list.length}개</span>
+        <span className="text-[12.5px] text-ink-muted">
+          수식 속 기호에 마우스를 올리거나 탭하면 설명 표시
+        </span>
+      </summary>
+      <dl className="glossary-legend-list">
+        {list.map(([id, t]) => (
+          <div key={id} className="glossary-legend-row">
+            <dt className="flex items-baseline gap-2">
+              <TexInline tex={t.tex} className="shrink-0 text-crimson" />
+              <span className="text-[13.5px] font-semibold text-ink">{t.name}</span>
+            </dt>
+            <dd className="mt-0.5 text-[13px] leading-[1.6] text-ink-soft">
+              <Markdown inline>{t.desc}</Markdown>
+              <span className="mt-0.5 block text-ink">
+                <span className="glossary-tip-ex-label">예</span>
+                <Markdown inline>{t.example}</Markdown>
+              </span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }

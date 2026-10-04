@@ -41,6 +41,17 @@ const INLINE_COMPONENTS: Components = {
  * 번호를 리스트 마커로 빨아들인다(그래서 화면에서 "1."이 사라진다).
  * 인라인 모드는 애초에 블록을 만들 자리가 아니므로 목록·인용·제목 표시를 이스케이프한다.
  */
+/**
+ * 한 줄에 단독으로 쓴 `$$수식$$` 을 블록 수식으로 바꾼다.
+ *
+ * remark-math 는 `$$` 가 **독립된 줄**에 있어야 블록(디스플레이) 수식으로 본다.
+ * 데이터는 `$$수식$$` 을 한 줄로 쓰므로, 그대로 두면 문장 속 작은 인라인 수식이 된다
+ * (DiD 추정식, 극한식 등). 블록 모드에서만 적용하고, inline 모드는 한 줄 표시가 목적이라 그대로 둔다.
+ */
+function fenceDisplayMath(src: string): string {
+  return src.replace(/^[ \t]*\$\$([^$\n]+)\$\$[ \t]*$/gm, (_, body: string) => `$$\n${body.trim()}\n$$`);
+}
+
 function escapeBlockStarts(src: string): string {
   return src
     .replace(/^([ \t]*)(\d+)([.)])(\s)/gm, "$1$2\\$3$4")
@@ -75,7 +86,7 @@ export function Markdown({ children, className, proseSize = "base", inline }: Ma
   return (
     <div className={clsx(proseClass, "prose-ink max-w-none", className)}>
       <ReactMarkdown remarkPlugins={REMARK} rehypePlugins={REHYPE as never}>
-        {children}
+        {fenceDisplayMath(children)}
       </ReactMarkdown>
     </div>
   );

@@ -7951,40 +7951,34 @@
             {
               "label": "나",
               "question": "$\\htmlData{g=stats.xbar}{\\bar{X}}$ 의 분산이 $\\frac{\\htmlData{g=stats.sigma2}{\\sigma^2}}{\\htmlData{g=stats.n}{n}}$ 임을 증명하시오. 즉 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.E}{E}[(\\htmlData{g=stats.xbar}{\\bar{X}} - \\htmlData{g=stats.E}{E}[\\htmlData{g=stats.xbar}{\\bar{X}}])^2] = \\frac{\\htmlData{g=stats.sigma2}{\\sigma^2}}{\\htmlData{g=stats.n}{n}}$ 임을 증명하시오.",
-              "intuition": "10명을 뽑아 평균을 내면 튀는 값이 서로 상쇄돼 결과가 안정됩니다. 100명을 뽑으면 더 안정됩니다. **표본을 늘리면 표본평균의 흔들림이 $\\htmlData{g=stats.n}{n}$ 분의 1로 줄어듭니다.** 표준편차 기준으로는 $\\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 분의 1입니다.",
+              "intuition": "대한민국 성인의 평균 키를 조사한다고 해 봅시다. 전체 성인 중에는 150cm인 사람도, 190cm인 사람도 있어서 키의 분산 $\\htmlData{g=stats.sigma2}{\\sigma^2}$ 이 큽니다.\n그런데 무작위로 100명($\\htmlData{g=stats.n}{n} = 100$)을 뽑아 그들의 **평균 키**를 내면, 150cm인 사람이 뽑히더라도 190cm인 사람이나 평범한 키의 사람들과 섞이면서 평균은 결국 모집단의 진짜 평균(예: 173cm) 근처로 모입니다.\n**표본이 클수록 평균값이 흔들리는 폭이 줄어들기 때문에, 표본평균의 분산은 모분산보다 작아집니다.**",
               "steps": [
                 {
-                  "heading": "1. 정의를 쓴다",
-                  "body": "분산의 정의와 앞에서 구한 $\\htmlData{g=stats.E}{E}[\\htmlData{g=stats.xbar}{\\bar{X}}] = \\htmlData{g=stats.mu}{\\mu}$ 를 결합합니다.",
-                  "math": "\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.E}{E}\\!\\left[(\\htmlData{g=stats.xbar}{\\bar{X}} - \\htmlData{g=stats.E}{E}[\\htmlData{g=stats.xbar}{\\bar{X}}])^2\\right] = \\htmlData{g=stats.E}{E}\\!\\left[(\\htmlData{g=stats.xbar}{\\bar{X}} - \\htmlData{g=stats.mu}{\\mu})^2\\right]",
-                  "example": "주사위 한 개로 분산의 정의를 따라가 봅니다. 평균 3.5에서의 거리는 −2.5, −1.5, −0.5, 0.5, 1.5, 2.5이고, 제곱하면 6.25, 2.25, 0.25, 0.25, 2.25, 6.25입니다. 그 평균 $17.5 \\div 6 = \\frac{35}{12} \\htmlData{g=common.approx}{\\approx} 2.92$ 가 $\\htmlData{g=stats.sigma2}{\\sigma^2}$ 입니다. $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}})$ 도 같은 방식으로 '표본평균이 3.5에서 벗어난 거리의 제곱 평균'입니다."
+                  "heading": "1. 상수 $\\frac{1}{\\htmlData{g=stats.n}{n}}$ 을 밖으로 꺼낸다",
+                  "body": "모집단에서 독립적으로 뽑은 $\\htmlData{g=stats.n}{n}$ 개의 표본을 $\\htmlData{g=stats.Xi}{X_1}, \\htmlData{g=stats.Xi}{X_2}, \\ldots, \\htmlData{g=stats.Xi}{X_n}$ 이라 하면, 각 표본은 모집단과 같은 분산 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_i}) = \\htmlData{g=stats.sigma2}{\\sigma^2}$ 을 가집니다. 표본평균은 이들의 산술평균 $\\htmlData{g=stats.xbar}{\\bar{X}} = \\frac{\\htmlData{g=stats.Xi}{X_1} + \\htmlData{g=stats.Xi}{X_2} + \\cdots + \\htmlData{g=stats.Xi}{X_n}}{\\htmlData{g=stats.n}{n}}$ 입니다.\n분산에서는 상수 $\\frac{1}{\\htmlData{g=stats.n}{n}}$ 이 밖으로 나올 때 **제곱이 되어** $\\frac{1}{\\htmlData{g=stats.n}{n}^2}$ 이 됩니다.",
+                  "math": "\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.Var}{Var}\\!\\left(\\frac{1}{\\htmlData{g=stats.n}{n}}\\,(\\htmlData{g=stats.Xi}{X_1} + \\htmlData{g=stats.Xi}{X_2} + \\cdots + \\htmlData{g=stats.Xi}{X_n})\\right) = \\frac{1}{\\htmlData{g=stats.n}{n}^2}\\, \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_1} + \\htmlData{g=stats.Xi}{X_2} + \\cdots + \\htmlData{g=stats.Xi}{X_n})",
+                  "example": "$\\htmlData{g=stats.n}{n} = 4$ 명을 뽑으면 $\\htmlData{g=stats.xbar}{\\bar{X}} = \\frac{1}{4}(\\htmlData{g=stats.Xi}{X_1} + \\htmlData{g=stats.Xi}{X_2} + \\htmlData{g=stats.Xi}{X_3} + \\htmlData{g=stats.Xi}{X_4})$ 이고, 밖으로 나온 $\\frac{1}{4}$ 은 제곱되어 $\\frac{1}{16}$ 이 됩니다.\n왜 제곱일까: 모든 키를 4분의 1로 줄이면 흩어진 폭도 4분의 1이 되는데, 분산은 그 폭을 제곱한 값이라 16분의 1이 됩니다."
                 },
                 {
-                  "heading": "2. 상수배의 분산 성질",
-                  "body": "$\\htmlData{g=stats.xbar}{\\bar{X}} = \\frac{1}{\\htmlData{g=stats.n}{n}}\\htmlData{g=stats.sum}{\\sum} \\htmlData{g=stats.Xi}{X_i}$ 이고 상수 $\\htmlData{g=stats.a}{a}$ 에 대해 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.a}{a}\\htmlData{g=stats.Y}{Y}) = \\htmlData{g=stats.a}{a}^2 \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Y}{Y})$ 이므로 $1/\\htmlData{g=stats.n}{n}$ 이 제곱으로 빠져나옵니다.",
-                  "math": "\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.Var}{Var}\\!\\left(\\frac{1}{\\htmlData{g=stats.n}{n}}\\htmlData{g=stats.sum}{\\sum_{i=1}^{n}} \\htmlData{g=stats.Xi}{X_i}\\right) = \\frac{1}{\\htmlData{g=stats.n}{n}^2} \\htmlData{g=stats.Var}{Var}\\!\\left(\\htmlData{g=stats.sum}{\\sum_{i=1}^{n}} \\htmlData{g=stats.Xi}{X_i}\\right)",
-                  "example": "점수 1, 2, 3(평균 2)의 분산은 $(1 + 0 + 1) \\div 3 = \\frac{2}{3}$ 입니다. 모두 2배 한 2, 4, 6(평균 4)의 분산은 $(4 + 0 + 4) \\div 3 = \\frac{8}{3}$ 으로 $2^2 = 4$ 배가 됩니다. 반대로 $\\frac{1}{4}$ 배 하면 분산은 $\\frac{1}{16}$ 배가 됩니다."
+                  "heading": "2. 독립이면 분산을 그대로 더한다",
+                  "body": "각 표본은 서로 독립이므로 **합의 분산은 각각의 분산을 더한 것과 같습니다.** 두 확률변수 $\\htmlData{g=stats.Y}{Y}$, $\\htmlData{g=stats.Z}{Z}$ 가 독립이면 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Y}{Y} + \\htmlData{g=stats.Z}{Z}) = \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Y}{Y}) + \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Z}{Z})$ 이고, 이 성질을 $\\htmlData{g=stats.n}{n}$ 개의 표본에 차례로 적용합니다.",
+                  "math": "\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{1}{\\htmlData{g=stats.n}{n}^2}\\left[\\,\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_1}) + \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_2}) + \\cdots + \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_n})\\,\\right]",
+                  "example": "키의 분산을 $\\htmlData{g=stats.sigma2}{\\sigma^2} = 100$ (표준편차 10cm)이라고 하면, $\\htmlData{g=stats.n}{n} = 4$ 일 때 대괄호 안은\n$\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_1}) + \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_2}) + \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_3}) + \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_4}) = 100 + 100 + 100 + 100$ 입니다."
                 },
                 {
-                  "heading": "3. 독립성으로 합의 분산을 분해",
-                  "body": "여기서 **iid 가정의 독립성이 결정적**입니다. 독립이면 공분산이 모두 0이므로 합의 분산은 분산의 합과 같아집니다.",
-                  "math": "\\htmlData{g=stats.Var}{Var}\\!\\left(\\htmlData{g=stats.sum}{\\sum_{i=1}^{n}} \\htmlData{g=stats.Xi}{X_i}\\right) = \\htmlData{g=stats.sum}{\\sum_{i=1}^{n}} \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_i}) + 2\\!\\!\\htmlData{g=stats.sum}{\\sum_{i<j}}\\!\\underbrace{\\htmlData{g=stats.Cov}{Cov}(\\htmlData{g=stats.Xi}{X_i}, \\htmlData{g=stats.Xi}{X_j})}_{=\\,0} = \\htmlData{g=stats.sum}{\\sum_{i=1}^{n}} \\htmlData{g=stats.sigma2}{\\sigma^2} = \\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2}",
-                  "example": "주사위 두 개를 따로 던져 더하면(독립) 합의 분산은 $\\frac{35}{12} + \\frac{35}{12} = \\frac{35}{6} \\htmlData{g=common.approx}{\\approx} 5.83$ 입니다. 반대로 주사위 하나의 값을 두 번 세면($\\htmlData{g=stats.Xi}{X_1} = \\htmlData{g=stats.Xi}{X_2}$, 완전히 같이 움직임) 합이 $2\\htmlData{g=stats.Xi}{X_1}$ 이라 분산이 $4 \\times \\frac{35}{12} \\htmlData{g=common.approx}{\\approx} 11.67$ 로 두 배가 됩니다. 늘어난 5.83이 바로 공분산 항 $2\\,\\htmlData{g=stats.Cov}{Cov}(\\htmlData{g=stats.Xi}{X_1}, \\htmlData{g=stats.Xi}{X_2})$ 입니다."
+                  "heading": "3. 모분산 $\\htmlData{g=stats.sigma2}{\\sigma^2}$ 을 대입한다",
+                  "body": "모든 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_i})$ 는 모분산 $\\htmlData{g=stats.sigma2}{\\sigma^2}$ 과 같으므로 대괄호 안은 $\\htmlData{g=stats.sigma2}{\\sigma^2}$ 을 $\\htmlData{g=stats.n}{n}$ 번 더한 $\\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2}$ 입니다. 분자의 $\\htmlData{g=stats.n}{n}$ 이 분모의 $\\htmlData{g=stats.n}{n}^2$ 과 약분되어, **분모에 $\\htmlData{g=stats.n}{n}$ 이 남습니다.**",
+                  "math": "\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{1}{\\htmlData{g=stats.n}{n}^2} \\times (\\htmlData{g=stats.n}{n} \\cdot \\htmlData{g=stats.sigma2}{\\sigma^2}) = \\frac{\\htmlData{g=stats.sigma2}{\\sigma^2}}{\\htmlData{g=stats.n}{n}}",
+                  "example": "$\\frac{1}{16} \\times (4 \\times 100) = \\frac{400}{16} = 25$ 이고, 이는 $\\frac{100}{4}$ 과 같습니다. 한 사람 키의 분산 100이 4명 평균 키에서는 25로 줄었습니다."
                 },
                 {
-                  "heading": "4. 정리",
-                  "body": "이를 대입하면 결과가 나옵니다.",
-                  "math": "\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{1}{\\htmlData{g=stats.n}{n}^2} \\cdot \\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2} = \\frac{\\htmlData{g=stats.sigma2}{\\sigma^2}}{\\htmlData{g=stats.n}{n}} \\qquad \\htmlData{g=common.implies}{\\Longrightarrow} \\qquad \\htmlData{g=stats.SD}{SD}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{\\htmlData{g=stats.sigma}{\\sigma}}{\\htmlData{g=stats.sqrtn}{\\sqrt{n}}}",
-                  "example": "주사위($\\htmlData{g=stats.sigma2}{\\sigma^2} \\htmlData{g=common.approx}{\\approx} 2.92$, $\\htmlData{g=stats.sigma}{\\sigma} \\htmlData{g=common.approx}{\\approx} 1.71$)로 계산합니다.\n· $\\htmlData{g=stats.n}{n} = 4$: $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = 2.92 \\div 4 \\htmlData{g=common.approx}{\\approx} 0.73$, $\\htmlData{g=stats.SD}{SD}(\\htmlData{g=stats.xbar}{\\bar{X}}) = 1.71 \\div \\htmlData{g=common.sqrt}{\\sqrt{4}} \\htmlData{g=common.approx}{\\approx} 0.85$\n· $\\htmlData{g=stats.n}{n} = 100$: $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = 2.92 \\div 100 \\htmlData{g=common.approx}{\\approx} 0.029$, $\\htmlData{g=stats.SD}{SD}(\\htmlData{g=stats.xbar}{\\bar{X}}) = 1.71 \\div \\htmlData{g=common.sqrt}{\\sqrt{100}} \\htmlData{g=common.approx}{\\approx} 0.17$"
-                },
-                {
-                  "heading": "5. 해석",
-                  "body": "$\\htmlData{g=stats.sigma}{\\sigma} / \\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 을 **표준오차(standard error)** 라 부릅니다. 표본을 4배로 늘리면 표준오차는 절반이 됩니다. 정밀도를 2배 높이려면 표본을 4배 모아야 한다는 뜻이고, 이것이 대규모 조사가 비싼 이유입니다. 앞 문항과 달리 **여기서는 독립성이 반드시 필요합니다** — 관측치가 양의 상관을 가지면 실제 분산은 $\\htmlData{g=stats.sigma2}{\\sigma^2}/\\htmlData{g=stats.n}{n}$ 보다 커집니다.",
-                  "example": "표준오차를 절반으로 줄이려면 표본이 4배 필요합니다.\n· 주사위: $\\htmlData{g=stats.n}{n} = 100$ → 표준오차 0.17, $\\htmlData{g=stats.n}{n} = 400$ → $1.71 \\div \\htmlData{g=common.sqrt}{\\sqrt{400}} \\htmlData{g=common.approx}{\\approx} 0.085$\n· 여론조사: 1,000명 조사의 오차 약 ±3.1%p를 ±1.55%p로 줄이려면 4,000명이 필요"
+                  "heading": "4. $\\htmlData{g=stats.n}{n}$ 이 커지면 분산은 0으로",
+                  "body": "표본 크기 $\\htmlData{g=stats.n}{n}$ 이 한없이 커지면 분모가 커지므로 표본평균의 분산은 0에 가까워집니다.\n\n$$\\htmlData{g=stats.lim}{\\lim_{n \\to \\infty}} \\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.lim}{\\lim_{n \\to \\infty}} \\frac{\\htmlData{g=stats.sigma2}{\\sigma^2}}{\\htmlData{g=stats.n}{n}} = 0$$\n\n![모분산이 100일 때 표본 크기 n이 커질수록 표본평균의 분산 100/n이 0에 가까워지는 그래프](/stats_variance_curve.svg)\n\n표본평균이 모평균 주변으로 점점 좁게 모인다는 뜻이며, 다음 문제 (다)의 **대수의 법칙**으로 이어집니다.",
+                  "example": "$\\htmlData{g=stats.sigma2}{\\sigma^2} = 100$ 일 때 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{100}{\\htmlData{g=stats.n}{n}}$ 은\n· $\\htmlData{g=stats.n}{n} = 1$: 100 (한 명의 키 = 모분산 그대로)\n· $\\htmlData{g=stats.n}{n} = 10$: 10\n· $\\htmlData{g=stats.n}{n} = 100$: 1\n· $\\htmlData{g=stats.n}{n} = 10{,}000$: 0.01\n표본을 100배로 늘리면 분산은 100분의 1이 됩니다."
                 }
               ],
-              "answer": "**$\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.sigma2}{\\sigma^2} / \\htmlData{g=stats.n}{n}$ 이다.** $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.a}{a}\\htmlData{g=stats.Y}{Y}) = \\htmlData{g=stats.a}{a}^2\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Y}{Y})$ 에 의해 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{1}{\\htmlData{g=stats.n}{n}^2}\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.sum}{\\sum} \\htmlData{g=stats.Xi}{X_i})$ 이고, 독립성으로 공분산이 모두 0이므로 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.sum}{\\sum} \\htmlData{g=stats.Xi}{X_i}) = \\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2}$ 이다. 따라서 $\\frac{1}{\\htmlData{g=stats.n}{n}^2} \\cdot \\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2} = \\htmlData{g=stats.sigma2}{\\sigma^2}/\\htmlData{g=stats.n}{n}$ 이며, 표준오차는 $\\htmlData{g=stats.sigma}{\\sigma}/\\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 로 표본이 커질수록 작아진다.",
-              "answerExample": "주사위 한 개의 분산은 약 2.92이지만 100번 던진 평균의 분산은 $2.92 \\div 100 \\htmlData{g=common.approx}{\\approx} 0.029$ 로 100분의 1이 된다. 표준오차로는 $1.71 \\div 10 \\htmlData{g=common.approx}{\\approx} 0.17$ 로 10분의 1이다."
+              "answer": "**$\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\htmlData{g=stats.sigma2}{\\sigma^2} / \\htmlData{g=stats.n}{n}$ 이다.** 분산에서는 상수가 제곱되어 밖으로 나오므로 $\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.xbar}{\\bar{X}}) = \\frac{1}{\\htmlData{g=stats.n}{n}^2}\\,\\htmlData{g=stats.Var}{Var}(\\htmlData{g=stats.Xi}{X_1} + \\htmlData{g=stats.Xi}{X_2} + \\cdots + \\htmlData{g=stats.Xi}{X_n})$ 이고, 각 표본이 서로 독립이므로 합의 분산은 각 분산의 합 $\\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2}$ 이다. 따라서 $\\frac{1}{\\htmlData{g=stats.n}{n}^2} \\times \\htmlData{g=stats.n}{n}\\htmlData{g=stats.sigma2}{\\sigma^2} = \\frac{\\htmlData{g=stats.sigma2}{\\sigma^2}}{\\htmlData{g=stats.n}{n}}$ 이며, $\\htmlData{g=stats.n}{n}$ 이 커질수록 0에 가까워진다.",
+              "answerExample": "키의 분산이 100(표준편차 10cm)이면 4명 평균 키의 분산은 $100 \\div 4 = 25$, 100명 평균 키의 분산은 $100 \\div 100 = 1$ 이다."
             },
             {
               "label": "다",
@@ -8061,7 +8055,7 @@
               "steps": [
                 {
                   "heading": "1. 구간의 구조",
-                  "body": "구간의 중심은 표본평균, 반폭은 $\\htmlData{g=stats.c}{c} / \\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 입니다. $\\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 이 분모에 있는 이유는 표준오차가 $\\htmlData{g=stats.sigma}{\\sigma}/\\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 이기 때문이고, $\\htmlData{g=stats.c}{c}$ 는 신뢰수준에서 오는 임계값과 표준편차의 곱($\\htmlData{g=stats.c}{c} \\htmlData{g=common.approx}{\\approx} \\htmlData{g=stats.z196}{1.96}\\,\\htmlData{g=stats.sigma}{\\sigma}$)입니다.",
+                  "body": "구간의 중심은 표본평균, 반폭은 $\\htmlData{g=stats.c}{c} / \\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 입니다. $\\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 이 분모에 있는 이유는 (나)에서 구한 분산 $\\htmlData{g=stats.sigma2}{\\sigma^2}/\\htmlData{g=stats.n}{n}$ 의 제곱근, 곧 표본평균의 표준편차(표준오차)가 $\\htmlData{g=stats.sigma}{\\sigma}/\\htmlData{g=stats.sqrtn}{\\sqrt{n}}$ 이기 때문이고, $\\htmlData{g=stats.c}{c}$ 는 신뢰수준에서 오는 임계값과 표준편차의 곱($\\htmlData{g=stats.c}{c} \\htmlData{g=common.approx}{\\approx} \\htmlData{g=stats.z196}{1.96}\\,\\htmlData{g=stats.sigma}{\\sigma}$)입니다.",
                   "math": "\\left[\\htmlData{g=stats.xbar}{\\bar{X}} - \\frac{\\htmlData{g=stats.c}{c}}{\\htmlData{g=stats.sqrtn}{\\sqrt{n}}},\\;\\; \\htmlData{g=stats.xbar}{\\bar{X}} + \\frac{\\htmlData{g=stats.c}{c}}{\\htmlData{g=stats.sqrtn}{\\sqrt{n}}}\\right], \\qquad \\htmlData{g=stats.c}{c} \\htmlData{g=common.approx}{\\approx} \\htmlData{g=stats.z196}{1.96}\\,\\htmlData{g=stats.sigma}{\\sigma}",
                   "example": "주사위를 $\\htmlData{g=stats.n}{n} = 100$ 번 던져 $\\htmlData{g=stats.xbar}{\\bar{X}} = 3.6$ 이 나왔다고 합시다. $\\htmlData{g=stats.sigma}{\\sigma} \\htmlData{g=common.approx}{\\approx} 1.71$ 이므로 $\\htmlData{g=stats.c}{c} \\htmlData{g=common.approx}{\\approx} \\htmlData{g=stats.z196}{1.96} \\times 1.71 \\htmlData{g=common.approx}{\\approx} 3.35$, 반폭은 $3.35 \\div \\htmlData{g=common.sqrt}{\\sqrt{100}} \\htmlData{g=common.approx}{\\approx} 0.33$ 입니다. 신뢰구간은 $[3.6 - 0.33,\\ 3.6 + 0.33] = [3.27,\\ 3.93]$ 입니다."
                 },
@@ -8105,19 +8099,18 @@
             "stats.Z",
             "stats.a",
             "stats.b",
-            "stats.sqrtn",
-            "stats.sigma",
-            "common.approx",
-            "stats.Cov",
-            "stats.SD",
-            "common.sqrt",
-            "common.implies",
+            "stats.lim",
             "stats.eps",
             "stats.plim",
             "common.forall",
             "stats.P",
             "common.to",
+            "stats.sigma",
+            "stats.sqrtn",
+            "common.implies",
             "stats.N",
+            "common.sqrt",
+            "common.approx",
             "stats.dlim",
             "common.pm",
             "stats.z196",

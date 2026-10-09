@@ -25,9 +25,14 @@ export interface Question {
   subparts: SubPart[];
   /**
    * 이 문항의 수식에 등장하는 기호 해설 id (등장 순).
-   * 수식 안에서는 `\htmlData{g=<id>}{…}` 로 감싸져 있고, 설명은 glossary.json 에 있다.
+   * 수식 안에서는 `\htmlData{g=<id>}{…}` 로 감싸져 있고, 설명은 glossary.json symbols 에 있다.
    */
   glossary?: string[];
+  /**
+   * 이 문항의 수식 덩어리(모듈) 해설 id (등장 순).
+   * 수식 안에서는 `\htmlData{m=<id>}{…}` 로 감싸져 있고(포개질 수 있음), 설명은 formulas 에 있다.
+   */
+  formulas?: string[];
 }
 
 // ───── 기호 해설 ─────
@@ -42,7 +47,25 @@ export interface GlossaryTerm {
   example: string;
 }
 
-export type GlossaryPayload = Record<string, GlossaryTerm>;
+/** 수식 덩어리 하나의 해설. 마우스를 올리면 뜬다. */
+export interface FormulaTerm {
+  /** 해설 목록에 보여 줄 대표 형태 (LaTeX) */
+  tex: string;
+  name: string;
+  /** 덩어리 전체의 뜻 (인라인 마크다운·수식) */
+  desc: string;
+  /** 안쪽부터 읽는 순서 (한 줄씩) */
+  parts: string[];
+  /** 숫자 예 */
+  example: string;
+}
+
+export interface GlossaryPayload {
+  /** 기호 해설 — 기호를 클릭하면 뜬다 */
+  symbols: Record<string, GlossaryTerm>;
+  /** 수식 덩어리 해설 — 수식에 마우스를 올리면 뜬다 */
+  formulas: Record<string, FormulaTerm>;
+}
 
 export interface ExamSet {
   title: string;

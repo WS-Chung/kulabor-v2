@@ -70,7 +70,8 @@ function markdown(where, text) {
 
 // ── exams.json ──
 const exams = load("exams.json");
-let wrappedIds = new Set();
+const wrappedIds = new Set();
+const wrappedForms = new Set();
 for (const key of exams.order) {
   for (const q of exams.items[key].questions) {
     const at = (p) => `${q.id}${p}`;
@@ -83,6 +84,7 @@ for (const key of exams.order) {
       });
     });
     for (const m of JSON.stringify(q).matchAll(/\\\\htmlData\{g=([^}]+)\}/g)) wrappedIds.add(m[1]);
+    for (const m of JSON.stringify(q).matchAll(/\\\\htmlData\{m=([^}]+)\}/g)) wrappedForms.add(m[1]);
   }
 }
 
@@ -100,17 +102,25 @@ for (const it of load("quiz.json")) {
   markdown(`quiz#${it.id}.explanation`, it.explanation);
 }
 
-// ── glossary.json ──
+// ── glossary.json ── { symbols: 기호 해설, formulas: 수식 덩어리 해설 }
 const glossary = load("glossary.json");
-for (const [id, t] of Object.entries(glossary)) {
+for (const [id, t] of Object.entries(glossary.symbols)) {
   render(`glossary/${id}.tex`, t.tex, false);
   markdown(`glossary/${id}.desc`, t.desc);
   markdown(`glossary/${id}.example`, t.example);
 }
-const dangling = [...wrappedIds].filter((id) => !glossary[id]);
-for (const id of dangling) failures.push({ where: "exams.json", tex: id, msg: "glossary.json 에 없는 기호 id" });
+for (const [id, t] of Object.entries(glossary.formulas)) {
+  render(`formula/${id}.tex`, t.tex, false);
+  markdown(`formula/${id}.desc`, t.desc);
+  t.parts.forEach((p, i) => markdown(`formula/${id}.parts[${i}]`, p));
+  markdown(`formula/${id}.example`, t.example);
+}
+for (const id of wrappedIds) if (!glossary.symbols[id])
+  failures.push({ where: "exams.json", tex: id, msg: "glossary.json symbols 에 없는 기호 id" });
+for (const id of wrappedForms) if (!glossary.formulas[id])
+  failures.push({ where: "exams.json", tex: id, msg: "glossary.json formulas 에 없는 수식 id" });
 
-console.log(`수식 ${checked}개 렌더, 기호 id ${wrappedIds.size}종 참조`);
+console.log(`수식 ${checked}개 렌더, 기호 id ${wrappedIds.size}종 · 수식 해설 id ${wrappedForms.size}종 참조`);
 for (const f of failures.slice(0, 40)) {
   console.log(`  [FAIL] ${f.where}\n         ${f.msg}\n         ${f.tex}`);
 }

@@ -242,8 +242,24 @@ h4 {
   .glossary-legend-list {
     @apply grid grid-cols-1 gap-x-6 gap-y-3 border-t border-divider-soft px-4 py-3.5 md:grid-cols-2;
   }
+  /* 수식 해설은 수식이 길어 한 줄에 하나씩 */
+  .glossary-legend-list-wide {
+    @apply md:grid-cols-1 gap-y-4;
+  }
+  .glossary-legend-wrap {
+    @apply mt-3 space-y-2;
+  }
+  .glossary-legend-wrap > .glossary-legend {
+    @apply mt-0;
+  }
+  .glossary-legend-hint {
+    @apply text-[12.5px] leading-[1.6] text-ink-muted;
+  }
+  .formula-legend-tex {
+    @apply mt-1 block max-w-full overflow-x-auto text-[15px] text-crimson-deep;
+  }
 
-  /* ── 기호 해설 툴팁 (커서를 따라다님) ── */
+  /* ── 해설 툴팁 (수식: 커서를 따라다님 / 기호: 클릭 지점에 고정) ── */
   .glossary-tip {
     @apply rounded-md border border-hairline bg-canvas px-3.5 py-3 shadow-lg;
     position: fixed;
@@ -273,6 +289,32 @@ h4 {
   .glossary-tip-ex-label {
     @apply mr-1.5 inline-flex h-[18px] items-center rounded-sm bg-crimson/10 px-1.5
            text-[11px] font-bold text-crimson align-[1px];
+  }
+  .formula-tip {
+    max-width: min(380px, calc(100vw - 16px));
+  }
+  .glossary-tip-badge {
+    @apply inline-flex h-[18px] shrink-0 items-center rounded-sm bg-crimson px-1.5
+           text-[11px] font-bold text-white align-[1px];
+  }
+  .glossary-tip-badge-g {
+    @apply bg-ink-soft;
+  }
+  .formula-tip-parts {
+    @apply mt-1.5 space-y-0.5 text-[13px] leading-[1.55] text-ink;
+    counter-reset: part;
+  }
+  .formula-tip-parts > li {
+    @apply relative pl-5;
+    counter-increment: part;
+  }
+  .formula-tip-parts > li::before {
+    content: counter(part);
+    @apply absolute left-0 top-[3px] inline-flex h-[15px] w-[15px] items-center justify-center
+           rounded-full border border-crimson/40 text-[10px] font-bold text-crimson;
+  }
+  .glossary-tip-hint {
+    @apply mt-1.5 text-[11.5px] text-ink-faint;
   }
 
   /* ── 사이드바 / 내비게이션 ── */
@@ -331,20 +373,42 @@ h4 {
   padding-bottom: 2px;
 }
 
-/* 기호 해설이 붙은 기호 (\htmlData{g=…} → data-g). hover/탭 시 옅은 크림슨 배경 */
-.katex [data-g] {
+/* 수식 해설 대상 덩어리(\htmlData{m=…} → data-m)와 기호(\htmlData{g=…} → data-g).
+   강조 표시는 GlossaryTooltip 이 그리는 .tip-hl 상자가 맡는다(분수·합처럼 줄 높이를 넘는 수식도
+   다 덮기 위해). 여기서는 커서 모양과 '클릭할 수 있는 기호' 표시만 한다. */
+.katex [data-m] {
   cursor: help;
-  border-radius: 2px;
-  transition: background-color 0.12s ease;
 }
-.katex [data-g]:hover,
-.katex [data-g].g-active {
-  background-color: rgba(124, 0, 25, 0.12);
+.katex [data-g] {
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.katex [data-g]:hover {
+  color: var(--crimson);
 }
 @media (prefers-reduced-motion: reduce) {
   .katex [data-g] {
     transition: none;
   }
+}
+
+/* 가리키는 대상 강조 상자 — 수식 덩어리는 옅게, 고정된 기호는 진하게 */
+.tip-hl {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 55;
+  pointer-events: none;
+  border-radius: 4px;
+  mix-blend-mode: multiply;
+}
+.tip-hl-m {
+  background: rgba(124, 0, 25, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(124, 0, 25, 0.35);
+}
+.tip-hl-g {
+  background: rgba(124, 0, 25, 0.12);
+  box-shadow: inset 0 0 0 1.5px var(--crimson);
 }
 
 /* 아코디언 헤더 등 한 줄 자리에 들어가는 수식은 블록으로 벌어지지 않게 한다 */

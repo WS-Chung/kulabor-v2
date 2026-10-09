@@ -110,7 +110,7 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
 
   return (
     <div>
-      <GlossaryTooltip terms={glossary} />
+      <GlossaryTooltip glossary={glossary} />
 
       {/* ───────── 페이지 헤더 ───────── */}
       <header className="page-head">
@@ -273,8 +273,13 @@ export function ExamView({ semesters, exams, glossary, initialKey }: Props) {
                     )}
                   </div>
 
-                  {q.glossary && q.glossary.length > 0 && (
-                    <GlossaryLegend key={q.id} ids={q.glossary} terms={glossary} />
+                  {((q.formulas?.length ?? 0) > 0 || (q.glossary?.length ?? 0) > 0) && (
+                    <GlossaryLegend
+                      key={q.id}
+                      formulaIds={q.formulas ?? []}
+                      symbolIds={q.glossary ?? []}
+                      glossary={glossary}
+                    />
                   )}
                 </section>
 
@@ -487,40 +492,97 @@ function ExampleBlock({ children }: { children: string }) {
 }
 
 /**
- * 문항의 기호 해설 목록. 기본은 접힘.
+ * 문항의 수식 해설·기호 해설 목록. 둘 다 기본은 접힘.
  *
- * hover 툴팁은 마우스가 있어야 보이고 화면낭독기로는 읽히지 않는다.
+ * hover/클릭 툴팁은 마우스가 있어야 보이고 화면낭독기로는 읽히지 않는다.
  * 같은 내용을 여기에 펼쳐 두어 키보드·화면낭독기 사용자도 접근할 수 있게 한다.
  */
-function GlossaryLegend({ ids, terms }: { ids: string[]; terms: GlossaryPayload }) {
-  const list = ids.flatMap((id) => (terms[id] ? [[id, terms[id]] as const] : []));
-  if (list.length === 0) return null;
+function GlossaryLegend({
+  formulaIds,
+  symbolIds,
+  glossary,
+}: {
+  formulaIds: string[];
+  symbolIds: string[];
+  glossary: GlossaryPayload;
+}) {
+  const formulas = formulaIds.flatMap((id) =>
+    glossary.formulas[id] ? [[id, glossary.formulas[id]] as const] : [],
+  );
+  const symbols = symbolIds.flatMap((id) =>
+    glossary.symbols[id] ? [[id, glossary.symbols[id]] as const] : [],
+  );
+  if (formulas.length === 0 && symbols.length === 0) return null;
   return (
-    <details className="glossary-legend">
-      <summary className="glossary-legend-summary">
-        <span className="font-semibold text-ink">기호 해설</span>
-        <span className="chip">{list.length}개</span>
-        <span className="text-[12.5px] text-ink-muted">
-          수식 속 기호에 마우스를 올리거나 탭하면 설명 표시
-        </span>
-      </summary>
-      <dl className="glossary-legend-list">
-        {list.map(([id, t]) => (
-          <div key={id} className="glossary-legend-row">
-            <dt className="flex items-baseline gap-2">
-              <TexInline tex={t.tex} className="shrink-0 text-crimson" />
-              <span className="text-[13.5px] font-semibold text-ink">{t.name}</span>
-            </dt>
-            <dd className="mt-0.5 text-[13px] leading-[1.6] text-ink-soft">
-              <Markdown inline>{t.desc}</Markdown>
-              <span className="mt-0.5 block text-ink">
-                <span className="glossary-tip-ex-label">예</span>
-                <Markdown inline>{t.example}</Markdown>
-              </span>
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </details>
+    <div className="glossary-legend-wrap">
+      <p className="glossary-legend-hint">
+        수식에 마우스를 올리면 <strong className="text-ink">수식 해설</strong>, 기호를 클릭하면{" "}
+        <strong className="text-ink">기호 해설</strong> 표시 (터치: 기호 탭 → 기호 해설, 그 밖의 수식
+        부분 탭 → 수식 해설)
+      </p>
+
+      {formulas.length > 0 && (
+        <details className="glossary-legend">
+          <summary className="glossary-legend-summary">
+            <span className="font-semibold text-ink">수식 해설</span>
+            <span className="chip">{formulas.length}개</span>
+          </summary>
+          <dl className="glossary-legend-list glossary-legend-list-wide">
+            {formulas.map(([id, f]) => (
+              <div key={id} className="glossary-legend-row">
+                <dt>
+                  <span className="block text-[13.5px] font-semibold text-ink">{f.name}</span>
+                  <span className="formula-legend-tex">
+                    <TexInline tex={f.tex} />
+                  </span>
+                </dt>
+                <dd className="mt-0.5 text-[13px] leading-[1.6] text-ink-soft">
+                  <Markdown inline>{f.desc}</Markdown>
+                  {f.parts.length > 0 && (
+                    <ol className="formula-tip-parts">
+                      {f.parts.map((p, i) => (
+                        <li key={i}>
+                          <Markdown inline>{p}</Markdown>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                  <span className="mt-0.5 block text-ink">
+                    <span className="glossary-tip-ex-label">예</span>
+                    <Markdown inline>{f.example}</Markdown>
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+      )}
+
+      {symbols.length > 0 && (
+        <details className="glossary-legend">
+          <summary className="glossary-legend-summary">
+            <span className="font-semibold text-ink">기호 해설</span>
+            <span className="chip">{symbols.length}개</span>
+          </summary>
+          <dl className="glossary-legend-list">
+            {symbols.map(([id, t]) => (
+              <div key={id} className="glossary-legend-row">
+                <dt className="flex items-baseline gap-2">
+                  <TexInline tex={t.tex} className="shrink-0 text-crimson" />
+                  <span className="text-[13.5px] font-semibold text-ink">{t.name}</span>
+                </dt>
+                <dd className="mt-0.5 text-[13px] leading-[1.6] text-ink-soft">
+                  <Markdown inline>{t.desc}</Markdown>
+                  <span className="mt-0.5 block text-ink">
+                    <span className="glossary-tip-ex-label">예</span>
+                    <Markdown inline>{t.example}</Markdown>
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+      )}
+    </div>
   );
 }
